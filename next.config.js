@@ -17,9 +17,6 @@ const nextConfig = {
       },
     ],
   },
-  // Configuración para GitHub Pages
-  // basePath: '/Portafolio',
-  // assetPrefix: '/Portafolio/',
   // Optimizaciones para producción
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
