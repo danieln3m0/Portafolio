@@ -5,9 +5,22 @@
 @tailwind utilities;
 
 :root {
-  --background: rgba(10, 10, 10, 0.1);
+  /* Paleta "Fire in the Sky" */
+  --background: rgba(10, 10, 10, 0.95); /* Negro/Gris oscuro para fondo */
   --foreground: #ededed;
-  --cursor-color: #3b82f6;
+  --cursor-color: #ff4500; /* Rojo anaranjado */
+  
+  /* Colores principales del tema Fire in the Sky */
+  --fire-red: #ff4500; /* Rojo anaranjado - llamas */
+  --fire-yellow: #ffff00; /* Amarillo brillante - núcleos de luz */
+  --sky-blue: #1a1a3d; /* Azul oscuro - fondo nocturno */
+  --shadow-dark: #0a0a0a; /* Negro/Gris oscuro - siluetas */
+  --fire-orange: #ff8c00; /* Naranja cálido - transiciones */
+  
+  /* Gradientes temáticos */
+  --gradient-fire: linear-gradient(135deg, var(--fire-red), var(--fire-orange));
+  --gradient-sky: linear-gradient(135deg, var(--sky-blue), var(--shadow-dark));
+  --gradient-flame: linear-gradient(45deg, var(--fire-yellow), var(--fire-red), var(--fire-orange));
 }
 
 @media (prefers-color-scheme: light) {
@@ -213,13 +226,14 @@ html {
   color: white;
 }
 
-/* Gradient text */
+/* Gradient text - Fire in the Sky theme */
 .gradient-text {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+  background: var(--gradient-flame);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: gradient-shift 3s ease-in-out infinite;
+  animation: gradient-shift 4s ease-in-out infinite;
 }
 
 @keyframes gradient-shift {

@@ -164,11 +164,11 @@ function Navigation({ setIsHovering }: { setIsHovering: (hovering: boolean) => v
 function HeroSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => void }) {
   return (
     <section id="hero" className="min-h-screen flex items-center justify-center px-4 pt-20 relative overflow-hidden">
-      {/* Animated background shapes */}
+      {/* Animated background shapes - Fire in the Sky theme */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="floating-shape absolute top-20 left-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
-        <div className="floating-shape absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" style={{ animationDelay: '2s' }}></div>
-        <div className="floating-shape absolute top-1/2 left-1/2 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl" style={{ animationDelay: '4s' }}></div>
+        <div className="floating-shape absolute top-20 left-10 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl"></div>
+        <div className="floating-shape absolute bottom-20 right-10 w-96 h-96 bg-red-500/15 rounded-full blur-3xl" style={{ animationDelay: '2s' }}></div>
+        <div className="floating-shape absolute top-1/2 left-1/2 w-80 h-80 bg-yellow-500/8 rounded-full blur-3xl" style={{ animationDelay: '4s' }}></div>
       </div>
       
       <div className="max-w-6xl mx-auto text-center relative z-10">
@@ -214,7 +214,7 @@ function HeroSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => 
           >
             <a 
               href="#contact"
-              className="btn-primary bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-full transition-all duration-300 flex items-center gap-3 text-lg font-semibold hover-lift"
+              className="btn-primary bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-10 py-4 rounded-full transition-all duration-300 flex items-center gap-3 text-lg font-semibold hover-lift"
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
             >
@@ -223,7 +223,7 @@ function HeroSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => 
             </a>
             <a 
               href="/cv.pdf"
-              className="border-2 border-white/30 hover:border-white/60 text-white px-10 py-4 rounded-full transition-all duration-300 flex items-center gap-3 text-lg font-semibold hover-lift"
+              className="border-2 border-orange-400/50 hover:border-orange-400/80 text-white px-10 py-4 rounded-full transition-all duration-300 flex items-center gap-3 text-lg font-semibold hover-lift"
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
             >
@@ -249,7 +249,7 @@ function AboutSection({ setIsHovering }: { setIsHovering: (hovering: boolean) =>
           className="text-center mb-16"
         >
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">Sobre Mí</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto mb-8"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-orange-600 to-red-600 mx-auto mb-8"></div>
         </motion.div>
         
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -271,11 +271,11 @@ function AboutSection({ setIsHovering }: { setIsHovering: (hovering: boolean) =>
             </p>
             <div className="grid grid-cols-2 gap-4 text-gray-300">
               <div className="flex items-center gap-2">
-                <MapPin size={20} className="text-blue-400" />
+                <MapPin size={20} className="text-orange-400" />
                 <span>Lima, Perú</span>
               </div>
               <div className="flex items-center gap-2">
-                <Mail size={20} className="text-blue-400" />
+                <Mail size={20} className="text-orange-400" />
                 <span>francisdani143@gmail.com</span>
               </div>
             </div>
@@ -289,19 +289,19 @@ function AboutSection({ setIsHovering }: { setIsHovering: (hovering: boolean) =>
             className="grid grid-cols-2 gap-6"
           >
             <div className="glass p-6 rounded-lg text-center">
-              <div className="text-3xl font-bold text-blue-400 mb-2">17.5/20</div>
+              <div className="text-3xl font-bold text-yellow-400 mb-2">17.5/20</div>
               <div className="text-gray-300">Promedio Académico</div>
             </div>
             <div className="glass p-6 rounded-lg text-center">
-              <div className="text-3xl font-bold text-blue-400 mb-2">2026</div>
+              <div className="text-3xl font-bold text-yellow-400 mb-2">2026</div>
               <div className="text-gray-300">Graduación Esperada</div>
             </div>
             <div className="glass p-6 rounded-lg text-center">
-              <div className="text-3xl font-bold text-blue-400 mb-2">10+</div>
+              <div className="text-3xl font-bold text-yellow-400 mb-2">10+</div>
               <div className="text-gray-300">Tecnologías</div>
             </div>
             <div className="glass p-6 rounded-lg text-center">
-              <div className="text-3xl font-bold text-blue-400 mb-2">5+</div>
+              <div className="text-3xl font-bold text-yellow-400 mb-2">5+</div>
               <div className="text-gray-300">Proyectos Destacados</div>
             </div>
           </motion.div>
@@ -334,7 +334,7 @@ function ExperienceSection({ setIsHovering }: { setIsHovering: (hovering: boolea
           className="text-center mb-16"
         >
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">Experiencia</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-purple-600 to-pink-600 mx-auto mb-8"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-red-600 to-orange-600 mx-auto mb-8"></div>
         </motion.div>
         
         <div className="space-y-8">
@@ -350,7 +350,7 @@ function ExperienceSection({ setIsHovering }: { setIsHovering: (hovering: boolea
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4">
                 <div>
                   <h3 className="text-2xl font-bold text-white mb-2">{exp.title}</h3>
-                  <p className="text-xl text-blue-400 mb-2">{exp.company}</p>
+                  <p className="text-xl text-orange-400 mb-2">{exp.company}</p>
                   <p className="text-gray-400">{exp.location}</p>
                 </div>
                 <div className="text-gray-300 font-medium mt-4 lg:mt-0">{exp.period}</div>
@@ -362,7 +362,7 @@ function ExperienceSection({ setIsHovering }: { setIsHovering: (hovering: boolea
                 {exp.technologies.map((tech, techIndex) => (
                   <span
                     key={techIndex}
-                    className="bg-blue-600/20 text-blue-300 px-3 py-1 rounded-full text-sm"
+                    className="bg-orange-600/20 text-orange-300 px-3 py-1 rounded-full text-sm"
                   >
                     {tech}
                   </span>
@@ -416,9 +416,9 @@ function EducationSection({ setIsHovering }: { setIsHovering: (hovering: boolean
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4">
                 <div>
                   <h3 className="text-2xl font-bold text-white mb-2">{edu.degree}</h3>
-                  <p className="text-xl text-blue-400 mb-2">{edu.institution}</p>
+                  <p className="text-xl text-orange-400 mb-2">{edu.institution}</p>
                   <p className="text-gray-400 mb-1">{edu.location}</p>
-                  <p className="text-green-400 font-medium">{edu.status}</p>
+                  <p className="text-yellow-400 font-medium">{edu.status}</p>
                 </div>
                 <div className="text-gray-300 font-medium mt-4 lg:mt-0">{edu.period}</div>
               </div>
@@ -429,7 +429,7 @@ function EducationSection({ setIsHovering }: { setIsHovering: (hovering: boolean
                 {edu.subjects.map((subject, subjectIndex) => (
                   <span
                     key={subjectIndex}
-                    className="bg-green-600/20 text-green-300 px-3 py-1 rounded-full text-sm"
+                    className="bg-yellow-600/20 text-yellow-300 px-3 py-1 rounded-full text-sm"
                   >
                     {subject}
                   </span>
@@ -478,7 +478,7 @@ function SkillsSection({ setIsHovering }: { setIsHovering: (hovering: boolean) =
           className="text-center mb-16"
         >
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">Habilidades</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-cyan-600 to-blue-600 mx-auto mb-8"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-orange-500 mx-auto mb-8"></div>
         </motion.div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -491,7 +491,7 @@ function SkillsSection({ setIsHovering }: { setIsHovering: (hovering: boolean) =
               transition={{ duration: 0.8, delay: index * 0.1 }}
               className="glass p-6 rounded-lg text-center"
             >
-              <div className="text-blue-400 mb-4 flex justify-center">
+              <div className="text-orange-400 mb-4 flex justify-center">
                 {category.icon}
               </div>
               <h3 className="text-xl font-bold text-white mb-4">{category.title}</h3>
@@ -574,20 +574,20 @@ function ProjectsSection({ setIsHovering }: { setIsHovering: (hovering: boolean)
               transition={{ duration: 0.8, delay: index * 0.1 }}
               className="glass rounded-lg overflow-hidden group hover:scale-105 transition-transform duration-300"
             >
-              <div className="h-48 bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+              <div className="h-48 bg-gradient-to-br from-orange-600 to-red-600 flex items-center justify-center">
                 <Code className="w-16 h-16 text-white" />
               </div>
               
               <div className="p-6">
                 <h3 className="text-xl font-bold text-white mb-3">{project.title}</h3>
-                <p className="text-sm text-blue-400 mb-2">{project.period}</p>
+                <p className="text-sm text-orange-400 mb-2">{project.period}</p>
                 <p className="text-gray-300 mb-4 text-sm leading-relaxed">{project.description}</p>
                 
                 <div className="flex flex-wrap gap-2 mb-4">
                   {project.technologies.map((tech, techIndex) => (
                     <span
                       key={techIndex}
-                      className="bg-blue-600/20 text-blue-300 px-2 py-1 rounded text-xs"
+                      className="bg-orange-600/20 text-orange-300 px-2 py-1 rounded text-xs"
                     >
                       {tech}
                     </span>
@@ -597,7 +597,7 @@ function ProjectsSection({ setIsHovering }: { setIsHovering: (hovering: boolean)
                 <div className="flex gap-3">
                   <a
                     href={project.demo}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-center text-sm transition-colors duration-300 flex items-center justify-center gap-2"
+                    className="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded text-center text-sm transition-colors duration-300 flex items-center justify-center gap-2"
                     onMouseEnter={() => setIsHovering(true)}
                     onMouseLeave={() => setIsHovering(false)}
                   >
@@ -668,7 +668,7 @@ function CertificationsSection({ setIsHovering }: { setIsHovering: (hovering: bo
           className="text-center mb-16"
         >
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">Certificaciones</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-lime-600 to-green-600 mx-auto mb-8"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-yellow-600 to-orange-600 mx-auto mb-8"></div>
         </motion.div>
         
         <div className="grid md:grid-cols-2 gap-8">
@@ -684,7 +684,7 @@ function CertificationsSection({ setIsHovering }: { setIsHovering: (hovering: bo
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-white mb-2">{cert.title}</h3>
-                  <p className="text-blue-400 font-medium mb-1">{cert.issuer}</p>
+                  <p className="text-orange-400 font-medium mb-1">{cert.issuer}</p>
                 </div>
                 <span className="text-gray-300 text-sm font-medium">{cert.date}</span>
               </div>
@@ -709,7 +709,7 @@ function ContactSection({ setIsHovering }: { setIsHovering: (hovering: boolean) 
           className="text-center mb-16"
         >
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">Contacto</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-pink-600 to-purple-600 mx-auto mb-8"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-orange-600 to-red-600 mx-auto mb-8"></div>
           <p className="text-xl text-gray-300 font-light">¿Tienes un proyecto en mente? ¡Hablemos!</p>
         </motion.div>
         
@@ -729,7 +729,7 @@ function ContactSection({ setIsHovering }: { setIsHovering: (hovering: boolean) 
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
               >
-                <Mail className="w-6 h-6 text-blue-400" />
+                <Mail className="w-6 h-6 text-orange-400" />
                 <span>francisdani143@gmail.com</span>
               </a>
               
@@ -739,7 +739,7 @@ function ContactSection({ setIsHovering }: { setIsHovering: (hovering: boolean) 
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
               >
-                <Linkedin className="w-6 h-6 text-blue-400" />
+                <Linkedin className="w-6 h-6 text-orange-400" />
                 <span>linkedin.com/in/francis-daniel-mamani-silva</span>
               </a>
               
@@ -749,17 +749,17 @@ function ContactSection({ setIsHovering }: { setIsHovering: (hovering: boolean) 
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
               >
-                <Github className="w-6 h-6 text-blue-400" />
+                <Github className="w-6 h-6 text-orange-400" />
                 <span>github.com/francis-daniel-mamani-silva</span>
               </a>
               
               <div className="flex items-center gap-4 text-gray-300">
-                <MapPin className="w-6 h-6 text-blue-400" />
+                <MapPin className="w-6 h-6 text-orange-400" />
                 <span>Lima, Perú</span>
               </div>
               
               <div className="flex items-center gap-4 text-gray-300">
-                <span className="w-6 h-6 text-blue-400 flex items-center justify-center">🎓</span>
+                <span className="w-6 h-6 text-orange-400 flex items-center justify-center">🎓</span>
                 <span>Disponible desde Agosto 2025</span>
               </div>
             </div>
@@ -777,7 +777,7 @@ function ContactSection({ setIsHovering }: { setIsHovering: (hovering: boolean) 
                 <input
                   type="text"
                   placeholder="Tu nombre"
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-orange-400"
                 />
               </div>
               
@@ -785,7 +785,7 @@ function ContactSection({ setIsHovering }: { setIsHovering: (hovering: boolean) 
                 <input
                   type="email"
                   placeholder="Tu email"
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-400"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-orange-400"
                 />
               </div>
               
@@ -793,13 +793,13 @@ function ContactSection({ setIsHovering }: { setIsHovering: (hovering: boolean) 
                 <textarea
                   placeholder="Tu mensaje"
                   rows={5}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 resize-none"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-orange-400 resize-none"
                 ></textarea>
               </div>
               
               <button
                 type="submit"
-                className="w-full btn-primary bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition-colors duration-300 hover-lift"
+                className="w-full btn-primary bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg transition-colors duration-300 hover-lift"
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
               >
