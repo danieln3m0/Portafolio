@@ -60,8 +60,8 @@ Estudiante apasionado por el desarrollo de software y la programación. Con expe
 ## 👤 Autor
 
 **Francis Daniel Mamani Silva**  
-Estudiante de Ingeniería de Sistemas - UMSA  
-6to Semestre
+Estudiante de Ingeniería de Software - Universidad Peruana de Ciencias Aplicadas (UPC)
+8to Semestre
 
 ---
 
