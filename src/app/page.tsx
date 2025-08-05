@@ -3,12 +3,21 @@
 import { motion } from 'framer-motion'
 import { Github, Linkedin, Mail, MapPin, Phone, ExternalLink, Download, Code, Database, Globe, Server } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import ThreeBackground from '@/components/ThreeBackground'
+// import ThreeTest from '@/components/ThreeTest'
+import SectionIndicator from '@/components/SectionIndicator'
 
 export default function Home() {
   const [mounted, setMounted] = useState(false)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [cursorVariant, setCursorVariant] = useState('default')
   const [isHovering, setIsHovering] = useState(false)
+  const [currentSection, setCurrentSection] = useState('hero')
+
+  // Debug: log cuando cambia la sección actual
+  useEffect(() => {
+    console.log('🏠 currentSection actualizado en page.tsx:', currentSection);
+  }, [currentSection]);
 
   useEffect(() => {
     setMounted(true)
@@ -19,6 +28,7 @@ export default function Home() {
 
     const handleSectionEnter = (sectionName: string) => {
       setCursorVariant(sectionName)
+      setCurrentSection(sectionName) // Agregar esta línea para actualizar la sección actual
     }
 
     // Add event listeners
@@ -26,12 +36,16 @@ export default function Home() {
     
     // Section observers
     const sections = document.querySelectorAll('section')
+    console.log('🔍 Secciones encontradas:', sections.length, Array.from(sections).map(s => s.id));
+    
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const sectionId = entry.target.id
+            console.log('👁️ Sección detectada:', sectionId);
             setCursorVariant(sectionId)
+            setCurrentSection(sectionId) // Actualizar también aquí
           }
         })
       },
@@ -49,7 +63,13 @@ export default function Home() {
   if (!mounted) return null
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 relative">
+    <main className="min-h-screen relative">
+      {/* Fondo 3D con Three.js */}
+      <ThreeBackground currentSection={currentSection} />
+      
+      {/* Indicador de sección */}
+      <SectionIndicator currentSection={currentSection} />
+      
       {/* Custom Cursor */}
       <div
         className={`custom-cursor ${cursorVariant} ${isHovering ? 'hover' : ''}`}
