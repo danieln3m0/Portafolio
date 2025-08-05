@@ -114,11 +114,22 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
   const loadModel = async (scene: any, THREE: any, GLTFLoader: any) => {
     const loader = new GLTFLoader();
     
+    // Determinar la ruta correcta basada en el entorno
+    const getModelPath = () => {
+      if (typeof window !== 'undefined') {
+        // En desarrollo local o producción
+        const basePath = process.env.NODE_ENV === 'production' ? '/Portafolio' : '';
+        return `${basePath}/skybrack/scene.gltf`;
+      }
+      return '/skybrack/scene.gltf';
+    };
+    
     try {
-      console.log('Intentando cargar modelo GLTF...');
+      const modelPath = getModelPath();
+      console.log('Intentando cargar modelo GLTF desde:', modelPath);
       const gltf = await new Promise((resolve, reject) => {
         loader.load(
-          '/skybrack/scene.gltf',
+          modelPath,
           resolve,
           (progress: any) => {
             console.log('Progreso de carga:', (progress.loaded / progress.total * 100) + '%');
