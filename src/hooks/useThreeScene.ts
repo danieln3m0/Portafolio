@@ -119,22 +119,35 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       if (typeof window !== 'undefined') {
         // En desarrollo local o producción
         const basePath = process.env.NODE_ENV === 'production' ? '/Portafolio' : '';
-        return `${basePath}/skybrack/scene.gltf`;
+        const modelPath = `${basePath}/skybrack/scene.gltf`;
+        console.log('🔍 Entorno:', process.env.NODE_ENV);
+        console.log('🔍 Base path:', basePath);
+        console.log('🔍 Model path final:', modelPath);
+        return modelPath;
       }
       return '/skybrack/scene.gltf';
     };
     
     try {
       const modelPath = getModelPath();
-      console.log('Intentando cargar modelo GLTF desde:', modelPath);
+      console.log('🚀 Intentando cargar modelo GLTF desde:', modelPath);
+      
       const gltf = await new Promise((resolve, reject) => {
         loader.load(
           modelPath,
-          resolve,
-          (progress: any) => {
-            console.log('Progreso de carga:', (progress.loaded / progress.total * 100) + '%');
+          (loadedGltf) => {
+            console.log('✅ Modelo GLTF cargado exitosamente');
+            resolve(loadedGltf);
           },
-          reject
+          (progress: any) => {
+            const percentage = (progress.loaded / progress.total * 100).toFixed(1);
+            console.log('📊 Progreso de carga:', percentage + '%');
+          },
+          (error) => {
+            console.error('❌ Error cargando modelo GLTF:', error);
+            console.error('❌ URL que falló:', modelPath);
+            reject(error);
+          }
         );
       });
 
