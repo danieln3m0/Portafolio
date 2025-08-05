@@ -10,6 +10,7 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
   const modelRef = useRef<any>(null); // Nueva ref para el modelo
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Debug: log cuando se inicializa el hook
   console.log('🔧 useThreeScene inicializado con sección:', currentSection);
@@ -160,7 +161,7 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       // Hacer una rotación inicial después de cargar
       setTimeout(() => {
         console.log('🎲 Ejecutando rotación inicial del modelo');
-        rotateModelRandomly('hero');
+        rotateModelRandomly();
       }, 1000);
       
     } catch (error) {
@@ -195,13 +196,13 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       // Hacer una rotación inicial después de cargar el cubo
       setTimeout(() => {
         console.log('🎲 Ejecutando rotación inicial del cubo');
-        rotateModelRandomly('hero');
+        rotateModelRandomly();
       }, 1000);
     }
   };
 
-  const rotateModelRandomly = (section: string) => {
-    console.log('🎲 rotateModelRandomly llamado para sección:', section);
+  const rotateModelRandomly = () => {
+    console.log('🎲 Rotando modelo de forma controlada');
     console.log('📦 modelRef.current:', !!modelRef.current);
     
     if (!modelRef.current) {
@@ -209,17 +210,17 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       return;
     }
 
-    console.log('✅ Rotando modelo aleatoriamente para sección:', section);
+    console.log('✅ Ejecutando rotación suave y controlada');
     
-    // Generar rotaciones aleatorias
-    const randomX = (Math.random() - 0.5) * Math.PI * 0.5; // Rotación aleatoria en X (-45° a 45°)
-    const randomY = Math.random() * Math.PI * 2; // Rotación completa en Y (0° a 360°)
-    const randomZ = (Math.random() - 0.5) * Math.PI * 0.3; // Rotación pequeña en Z (-27° a 27°)
+    // Generar rotaciones más sutiles y controladas
+    const randomX = (Math.random() - 0.5) * Math.PI * 0.4; // Rotación suave en X (-36° a 36°)
+    const randomY = (Math.random() - 0.5) * Math.PI * 0.8 + modelRef.current.rotation.y; // Rotación relativa en Y (±72°)
+    const randomZ = (Math.random() - 0.5) * Math.PI * 0.2; // Rotación muy sutil en Z (±18°)
     
     console.log('🔄 Nuevas rotaciones:', { 
-      x: randomX * (180/Math.PI), 
-      y: randomY * (180/Math.PI), 
-      z: randomZ * (180/Math.PI) 
+      x: (randomX * (180/Math.PI)).toFixed(1) + '°', 
+      y: (randomY * (180/Math.PI)).toFixed(1) + '°', 
+      z: (randomZ * (180/Math.PI)).toFixed(1) + '°'
     });
     
     // Aplicar rotación suave con animación
@@ -235,20 +236,19 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       z: randomZ
     };
     
-    console.log('🎯 Rotación inicial:', startRotation);
-    console.log('🎯 Rotación objetivo:', targetRotation);
-    
-    // Animación suave de rotación
+    // Animación más lenta y suave
     let progress = 0;
-    const duration = 1000; // 1 segundo
+    const duration = 2000; // 2 segundos para una rotación muy suave
     const startTime = Date.now();
     
     const animate = () => {
       const currentTime = Date.now();
       progress = Math.min((currentTime - startTime) / duration, 1);
       
-      // Interpolación suave
-      const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+      // Interpolación muy suave con ease in-out
+      const easeProgress = progress < 0.5 
+        ? 2 * progress * progress 
+        : 1 - Math.pow(-2 * progress + 2, 2) / 2; // Ease in-out quad
       
       if (modelRef.current) {
         modelRef.current.rotation.x = startRotation.x + (targetRotation.x - startRotation.x) * easeProgress;
@@ -259,11 +259,24 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
-        console.log('✅ Animación de rotación completada');
+        console.log('✅ Animación suave completada');
       }
     };
     
     animate();
+  };
+
+  const handleScroll = () => {
+    // Limpiar timeout anterior si existe
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+
+    // Debounce: esperar 300ms después de que termine el scroll para más control
+    scrollTimeoutRef.current = setTimeout(() => {
+      console.log('🌀 Scroll detectado - activando rotación controlada');
+      rotateModelRandomly();
+    }, 300);
   };
 
   useEffect(() => {
@@ -280,10 +293,19 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       rendererRef.current.setSize(width, height);
     };
 
+    // Agregar event listeners
     window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll);
+      
+      // Limpiar timeout si existe
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
       if (rendererRef.current && containerRef.current) {
         containerRef.current.removeChild(rendererRef.current.domElement);
         rendererRef.current.dispose();
@@ -291,10 +313,11 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
     };
   }, []);
 
-  useEffect(() => {
-    console.log('📍 Sección cambiada a:', currentSection);
-    rotateModelRandomly(currentSection);
-  }, [currentSection]);
+  // Ya no necesitamos este useEffect que escuchaba cambios de sección
+  // useEffect(() => {
+  //   console.log('📍 Sección cambiada a:', currentSection);
+  //   rotateModelRandomly();
+  // }, [currentSection]);
 
   return { isLoading, error };
 };

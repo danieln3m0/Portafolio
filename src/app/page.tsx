@@ -22,17 +22,18 @@ export default function Home() {
   useEffect(() => {
     setMounted(true)
     
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY })
-    }
+    // COMENTADO: Funcionalidad del cursor personalizado
+    // const handleMouseMove = (e: MouseEvent) => {
+    //   setMousePosition({ x: e.clientX, y: e.clientY })
+    // }
 
-    const handleSectionEnter = (sectionName: string) => {
-      setCursorVariant(sectionName)
-      setCurrentSection(sectionName) // Agregar esta línea para actualizar la sección actual
-    }
+    // const handleSectionEnter = (sectionName: string) => {
+    //   setCursorVariant(sectionName)
+    //   setCurrentSection(sectionName) // Agregar esta línea para actualizar la sección actual
+    // }
 
     // Add event listeners
-    document.addEventListener('mousemove', handleMouseMove)
+    // document.addEventListener('mousemove', handleMouseMove)
     
     // Section observers
     const sections = document.querySelectorAll('section')
@@ -44,7 +45,7 @@ export default function Home() {
           if (entry.isIntersecting) {
             const sectionId = entry.target.id
             console.log('👁️ Sección detectada:', sectionId);
-            setCursorVariant(sectionId)
+            // setCursorVariant(sectionId)  // COMENTADO: cursor personalizado
             setCurrentSection(sectionId) // Actualizar también aquí
           }
         })
@@ -55,7 +56,7 @@ export default function Home() {
     sections.forEach((section) => observer.observe(section))
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
+      // document.removeEventListener('mousemove', handleMouseMove)
       observer.disconnect()
     }
   }, [])
@@ -70,7 +71,7 @@ export default function Home() {
       {/* Indicador de sección */}
       <SectionIndicator currentSection={currentSection} />
       
-      {/* Custom Cursor */}
+      {/* Custom Cursor - COMENTADO TEMPORALMENTE
       <div
         className={`custom-cursor ${cursorVariant} ${isHovering ? 'hover' : ''}`}
         style={{
@@ -78,6 +79,7 @@ export default function Home() {
           top: mousePosition.y,
         }}
       />
+      */}
       
       {/* Navigation */}
       <Navigation setIsHovering={setIsHovering} />

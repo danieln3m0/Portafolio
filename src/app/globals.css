@@ -17,18 +17,20 @@
   }
 }
 
+/* COMENTADO TEMPORALMENTE: cursor personalizado
 * {
   cursor: none;
 }
+*/
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  cursor: none;
+  /* cursor: none; COMENTADO TEMPORALMENTE */
 }
 
-/* Custom Cursor */
+/* COMENTADO TEMPORALMENTE: Custom Cursor
 .custom-cursor {
   position: fixed;
   top: 0;
@@ -82,6 +84,7 @@ body {
 .custom-cursor.contact {
   --cursor-color: #ec4899;
 }
+*/
 
 @layer utilities {
   .text-balance {
