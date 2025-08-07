@@ -722,13 +722,13 @@ function ContactSection({ setIsHovering }: { setIsHovering: (hovering: boolean) 
     }
 
     // Crear el mensaje para WhatsApp
-    const whatsappMessage = `¡Hola Francis! 👋
+    const whatsappMessage = `¡Hola Francis! 
 
 Me llamo *${formData.name}* y me gustaría contactarte.
 
-📧 *Mi email:* ${formData.email}
+Este es *Mi email:* ${formData.email}
 
-📝 *Mi mensaje:*
+Mi mensaje: 
 ${formData.message}
 
 ¡Espero tu respuesta!`;
