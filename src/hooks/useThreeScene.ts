@@ -123,8 +123,8 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
         let modelPath;
         
         if (isProduction && isGitHubPages) {
-          // En GitHub Pages usar URL raw de GitHub (más confiable)
-          modelPath = `https://raw.githubusercontent.com/danieln3m0/Portafolio/main/public/skybrack/scene.gltf`;
+          // En GitHub Pages usar la ruta correcta con el repositorio
+          modelPath = `https://danieln3m0.github.io/Portafolio/skybrack/scene.gltf`;
         } else if (isProduction) {
           // En producción pero no GitHub Pages
           modelPath = `/Portafolio/skybrack/scene.gltf`;
@@ -182,14 +182,14 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
         }
       };
       
-      // Lista de rutas para intentar
+      // Lista de rutas para intentar (en orden de prioridad)
       const possiblePaths = [
         modelPath, // Ruta principal
+        'https://danieln3m0.github.io/Portafolio/skybrack/scene.gltf', // GitHub Pages correcta
         'https://raw.githubusercontent.com/danieln3m0/Portafolio/main/public/skybrack/scene.gltf', // URL raw de GitHub
-        'https://danieln3m0.github.io/Portafolio/skybrack/scene.gltf', // GitHub Pages absoluta
         '/Portafolio/skybrack/scene.gltf', // Ruta relativa con basePath
-        './skybrack/scene.gltf', // Ruta relativa
-        '/skybrack/scene.gltf' // Ruta sin basePath
+        '/skybrack/scene.gltf', // Ruta sin basePath
+        './skybrack/scene.gltf' // Ruta relativa local
       ].filter((path, index, arr) => arr.indexOf(path) === index); // Remover duplicados
       
       const gltf = await tryLoadModel(possiblePaths);
