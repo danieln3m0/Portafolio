@@ -116,85 +116,41 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
     
     // Determinar la ruta correcta basada en el entorno
     const getModelPath = () => {
-      if (typeof window !== 'undefined') {
-        const isProduction = process.env.NODE_ENV === 'production';
-        const isGitHubPages = window.location.hostname === 'danieln3m0.github.io';
-        
-        let modelPath;
-        
-        if (isProduction && isGitHubPages) {
-          // En GitHub Pages usar la ruta correcta con el repositorio
-          modelPath = `https://danieln3m0.github.io/Portafolio/skybrack/scene.gltf`;
-        } else if (isProduction) {
-          // En producción pero no GitHub Pages
-          modelPath = `/Portafolio/skybrack/scene.gltf`;
-        } else {
-          // En desarrollo local
-          modelPath = '/skybrack/scene.gltf';
-        }
-        
-        console.log('🔍 Entorno:', process.env.NODE_ENV);
-        console.log('🔍 Hostname:', window.location.hostname);
-        console.log('🔍 Is GitHub Pages:', isGitHubPages);
-        console.log('🔍 Model path final:', modelPath);
-        console.log('🔍 Window location:', window.location.href);
-        
-        return modelPath;
-      }
-      return '/skybrack/scene.gltf';
+      // Usar siempre la URL raw de GitHub para máxima confiabilidad
+      const modelPath = 'https://raw.githubusercontent.com/danieln3m0/Portafolio/main/public/skybrack/scene.gltf';
+      
+      console.log('🔍 Entorno:', process.env.NODE_ENV);
+      console.log('🔍 Model path (raw GitHub):', modelPath);
+      console.log('🔍 Window location:', typeof window !== 'undefined' ? window.location.href : 'Server');
+      
+      return modelPath;
     };
     
     try {
       const modelPath = getModelPath();
-      console.log('🚀 Intentando cargar modelo GLTF desde:', modelPath);
+      console.log('🚀 Cargando modelo GLTF desde:', modelPath);
       
-      // Intentar cargar el modelo con múltiples rutas si falla
-      const tryLoadModel = async (paths: string[]): Promise<any> => {
-        for (let i = 0; i < paths.length; i++) {
-          const currentPath = paths[i];
-          console.log(`🔄 Intento ${i + 1}/${paths.length}: ${currentPath}`);
-          
-          try {
-            const gltf = await new Promise((resolve, reject) => {
-              loader.load(
-                currentPath,
-                (loadedGltf: any) => {
-                  console.log('✅ Modelo GLTF cargado exitosamente desde:', currentPath);
-                  resolve(loadedGltf);
-                },
-                (progress: any) => {
-                  if (progress.total > 0) {
-                    const percentage = (progress.loaded / progress.total * 100).toFixed(1);
-                    console.log('📊 Progreso de carga:', percentage + '%');
-                  }
-                },
-                (error: any) => {
-                  console.warn(`❌ Error con ruta ${currentPath}:`, error);
-                  reject(error);
-                }
-              );
-            });
-            return gltf;
-          } catch (error) {
-            console.warn(`❌ Falló la carga desde ${currentPath}:`, error);
-            if (i === paths.length - 1) throw error;
+      const gltf = await new Promise((resolve, reject) => {
+        loader.load(
+          modelPath,
+          (loadedGltf: any) => {
+            console.log('✅ Modelo GLTF cargado exitosamente desde:', modelPath);
+            resolve(loadedGltf);
+          },
+          (progress: any) => {
+            if (progress.total > 0) {
+              const percentage = (progress.loaded / progress.total * 100).toFixed(1);
+              console.log('📊 Progreso de carga:', percentage + '%');
+            }
+          },
+          (error: any) => {
+            console.error('❌ Error cargando modelo GLTF:', error);
+            reject(error);
           }
-        }
-      };
-      
-      // Lista de rutas para intentar (en orden de prioridad)
-      const possiblePaths = [
-        modelPath, // Ruta principal
-        'https://danieln3m0.github.io/Portafolio/skybrack/scene.gltf', // GitHub Pages correcta
-        'https://raw.githubusercontent.com/danieln3m0/Portafolio/main/public/skybrack/scene.gltf', // URL raw de GitHub
-        '/Portafolio/skybrack/scene.gltf', // Ruta relativa con basePath
-        '/skybrack/scene.gltf', // Ruta sin basePath
-        './skybrack/scene.gltf' // Ruta relativa local
-      ].filter((path, index, arr) => arr.indexOf(path) === index); // Remover duplicados
-      
-      const gltf = await tryLoadModel(possiblePaths);
+        );
+      });
 
-      console.log('Modelo GLTF cargado exitosamente');
+      console.log('✅ Modelo GLTF procesado correctamente');
       const model = (gltf as any).scene;
       
       // Guardar referencia del modelo
