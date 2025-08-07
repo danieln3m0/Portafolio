@@ -135,7 +135,7 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       const gltf = await new Promise((resolve, reject) => {
         loader.load(
           modelPath,
-          (loadedGltf) => {
+          (loadedGltf: any) => {
             console.log('✅ Modelo GLTF cargado exitosamente');
             resolve(loadedGltf);
           },
@@ -143,7 +143,7 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
             const percentage = (progress.loaded / progress.total * 100).toFixed(1);
             console.log('📊 Progreso de carga:', percentage + '%');
           },
-          (error) => {
+          (error: any) => {
             console.error('❌ Error cargando modelo GLTF:', error);
             console.error('❌ URL que falló:', modelPath);
             reject(error);
