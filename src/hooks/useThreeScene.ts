@@ -112,92 +112,100 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
   };
 
   const loadModel = async (scene: any, THREE: any, GLTFLoader: any) => {
-    const loader = new GLTFLoader();
-    
-    // Determinar la ruta correcta basada en el entorno
-    const getModelPath = () => {
-      if (typeof window !== 'undefined') {
-        const isProduction = process.env.NODE_ENV === 'production';
-        const isGitHubPages = window.location.hostname === 'danieln3m0.github.io';
-        
-        let modelPath;
-        
-        if (isProduction && isGitHubPages) {
-          // En GitHub Pages usar la ruta con el repositorio
-          modelPath = '/Portafolio/skybrack/scene.gltf';
-        } else if (isProduction) {
-          // En producción pero no GitHub Pages
-          modelPath = '/skybrack/scene.gltf';
-        } else {
-          // En desarrollo local
-          modelPath = '/skybrack/scene.gltf';
-        }
-        
-        console.log('🔍 Entorno:', process.env.NODE_ENV);
-        console.log('🔍 Hostname:', window.location.hostname);
-        console.log('🔍 Is GitHub Pages:', isGitHubPages);
-        console.log('🔍 Model path final:', modelPath);
-        console.log('🔍 Window location:', window.location.href);
-        
-        return modelPath;
-      }
-      return '/skybrack/scene.gltf';
-    };
+    // Por el problema de Git LFS, usamos un modelo procedural atractivo por ahora
+    console.log('🚀 Creando modelo 3D procedural - Crystal Formation');
     
     try {
-      const modelPath = getModelPath();
-      console.log('🚀 Cargando modelo GLTF desde:', modelPath);
+      // Crear un modelo procedural: formación cristalina
+      const group = new THREE.Group();
       
-      const gltf = await new Promise((resolve, reject) => {
-        loader.load(
-          modelPath,
-          (loadedGltf: any) => {
-            console.log('✅ Modelo GLTF cargado exitosamente desde:', modelPath);
-            resolve(loadedGltf);
-          },
-          (progress: any) => {
-            if (progress.total > 0) {
-              const percentage = (progress.loaded / progress.total * 100).toFixed(1);
-              console.log('📊 Progreso de carga:', percentage + '%');
-            }
-          },
-          (error: any) => {
-            console.error('❌ Error cargando modelo GLTF:', error);
-            reject(error);
-          }
-        );
+      // Cristales principales
+      const mainCrystalGeometry = new THREE.ConeGeometry(0.8, 3, 8);
+      const crystalMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0xff6b35, 
+        transparent: true,
+        opacity: 0.8,
+        shininess: 100 
       });
-
-      console.log('✅ Modelo GLTF procesado correctamente');
-      const model = (gltf as any).scene;
+      
+      // Cristal principal
+      const mainCrystal = new THREE.Mesh(mainCrystalGeometry, crystalMaterial);
+      mainCrystal.position.set(0, 0, 0);
+      mainCrystal.castShadow = true;
+      mainCrystal.receiveShadow = true;
+      group.add(mainCrystal);
+      
+      // Cristales secundarios
+      for (let i = 0; i < 5; i++) {
+        const secondaryCrystalGeometry = new THREE.ConeGeometry(0.3, 1.5, 6);
+        const secondaryCrystalMaterial = new THREE.MeshPhongMaterial({ 
+          color: 0xff8c42,
+          transparent: true,
+          opacity: 0.7,
+          shininess: 80 
+        });
+        
+        const secondaryCrystal = new THREE.Mesh(secondaryCrystalGeometry, secondaryCrystalMaterial);
+        
+        // Posicionar alrededor del cristal principal
+        const angle = (i / 5) * Math.PI * 2;
+        const radius = 1.2;
+        secondaryCrystal.position.set(
+          Math.cos(angle) * radius,
+          -0.5 + Math.random() * 0.4,
+          Math.sin(angle) * radius
+        );
+        
+        // Rotación aleatoria
+        secondaryCrystal.rotation.z = (Math.random() - 0.5) * 0.3;
+        secondaryCrystal.castShadow = true;
+        secondaryCrystal.receiveShadow = true;
+        
+        group.add(secondaryCrystal);
+      }
+      
+      // Base cristalina
+      const baseGeometry = new THREE.CylinderGeometry(1.5, 2, 0.3, 12);
+      const baseMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0xffb347,
+        transparent: true,
+        opacity: 0.6 
+      });
+      
+      const base = new THREE.Mesh(baseGeometry, baseMaterial);
+      base.position.set(0, -1.5, 0);
+      base.castShadow = true;
+      base.receiveShadow = true;
+      group.add(base);
+      
+      // Partículas flotantes
+      const particleGeometry = new THREE.SphereGeometry(0.02, 4, 4);
+      const particleMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0xffd700,
+        transparent: true,
+        opacity: 0.8 
+      });
+      
+      for (let i = 0; i < 15; i++) {
+        const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+        particle.position.set(
+          (Math.random() - 0.5) * 4,
+          (Math.random() - 0.5) * 4 + 1,
+          (Math.random() - 0.5) * 4
+        );
+        group.add(particle);
+      }
       
       // Guardar referencia del modelo
-      modelRef.current = model;
+      modelRef.current = group;
       
-      // Calcular el centro del modelo
-      const box = new THREE.Box3().setFromObject(model);
-      const center = box.getCenter(new THREE.Vector3());
+      // Escalar y posicionar
+      group.scale.setScalar(1.5);
+      group.position.set(0, 0, -5);
       
-      // Centrar el modelo en el origen
-      model.position.x = -center.x;
-      model.position.y = -center.y;
-      model.position.z = -center.z;
+      scene.add(group);
       
-      // Escalar el modelo si es necesario
-      model.scale.setScalar(6);
-      
-      // Posicionar el modelo centrado en la pantalla
-      model.position.set(0, 0, -5);
-      
-      // Configurar sombras
-      model.traverse((child: any) => {
-        if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-        }
-      });
-
-      scene.add(model);
+      console.log('✅ Modelo procedural Crystal Formation creado exitosamente');
       
       // Hacer una rotación inicial después de cargar
       setTimeout(() => {
@@ -206,23 +214,21 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       }, 1000);
       
     } catch (error) {
-      console.warn('No se pudo cargar el modelo GLTF, usando cubo de respaldo:', error);
+      console.warn('Error creando modelo procedural, usando cubo de respaldo:', error);
       
-      // Cubo de respaldo naranja
+      // Cubo de respaldo naranja como última opción
       const geometry = new THREE.BoxGeometry(2, 2, 2);
       const material = new THREE.MeshPhongMaterial({ 
-        color: 0xff8c00, // Naranja cálido
+        color: 0xff8c00,
         shininess: 100 
       });
       const cube = new THREE.Mesh(geometry, material);
       cube.castShadow = true;
       cube.receiveShadow = true;
-      cube.position.set(0, 0, -5); // Centrado en la pantalla
+      cube.position.set(0, 0, -5);
       
-      // Guardar referencia del cubo como modelo
       modelRef.current = cube;
       
-      // Animación de rotación continua para el cubo
       const animateCube = () => {
         if (modelRef.current === cube) {
           cube.rotation.x += 0.01;
@@ -234,7 +240,6 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       
       scene.add(cube);
       
-      // Hacer una rotación inicial después de cargar el cubo
       setTimeout(() => {
         console.log('🎲 Ejecutando rotación inicial del cubo');
         rotateModelRandomly();
