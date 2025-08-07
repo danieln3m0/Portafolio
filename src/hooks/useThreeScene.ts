@@ -116,14 +116,32 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
     
     // Determinar la ruta correcta basada en el entorno
     const getModelPath = () => {
-      // Usar siempre la URL raw de GitHub para máxima confiabilidad
-      const modelPath = 'https://raw.githubusercontent.com/danieln3m0/Portafolio/main/public/skybrack/scene.gltf';
-      
-      console.log('🔍 Entorno:', process.env.NODE_ENV);
-      console.log('🔍 Model path (raw GitHub):', modelPath);
-      console.log('🔍 Window location:', typeof window !== 'undefined' ? window.location.href : 'Server');
-      
-      return modelPath;
+      if (typeof window !== 'undefined') {
+        const isProduction = process.env.NODE_ENV === 'production';
+        const isGitHubPages = window.location.hostname === 'danieln3m0.github.io';
+        
+        let modelPath;
+        
+        if (isProduction && isGitHubPages) {
+          // En GitHub Pages usar la ruta con el repositorio
+          modelPath = '/Portafolio/skybrack/scene.gltf';
+        } else if (isProduction) {
+          // En producción pero no GitHub Pages
+          modelPath = '/skybrack/scene.gltf';
+        } else {
+          // En desarrollo local
+          modelPath = '/skybrack/scene.gltf';
+        }
+        
+        console.log('🔍 Entorno:', process.env.NODE_ENV);
+        console.log('🔍 Hostname:', window.location.hostname);
+        console.log('🔍 Is GitHub Pages:', isGitHubPages);
+        console.log('🔍 Model path final:', modelPath);
+        console.log('🔍 Window location:', window.location.href);
+        
+        return modelPath;
+      }
+      return '/skybrack/scene.gltf';
     };
     
     try {
