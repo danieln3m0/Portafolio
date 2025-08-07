@@ -65,9 +65,23 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       // Cargar modelo
       await loadModel(scene, THREE, GLTFLoader);
 
-      // Iniciar loop de renderizado
+      // Iniciar loop de renderizado con animación de luces
       const animate = () => {
         requestAnimationFrame(animate);
+        
+        // Animación de spotlight como en el ejemplo
+        const time = performance.now() / 3000;
+        if (sceneRef.current) {
+          const spotlights = sceneRef.current.children.filter((child: any) => child.type === 'SpotLight');
+          if (spotlights.length > 0) {
+            const mainSpotlight = spotlights[0];
+            if (mainSpotlight) {
+              mainSpotlight.position.x = Math.cos(time) * 2.5;
+              mainSpotlight.position.z = Math.sin(time) * 2.5;
+            }
+          }
+        }
+        
         renderer.render(scene, camera);
       };
       animate();
@@ -83,129 +97,158 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
   };
 
   const setupLights = (scene: any, THREE: any) => {
-    // Luz ambiente suave
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+    // Luz ambiente hemisférica como en el ejemplo
+    const ambientLight = new THREE.HemisphereLight(0xffffff, 0x8d8d8d, 0.15);
     scene.add(ambientLight);
 
-    // Luz direccional principal (rojo-naranja)
-    const directionalLight = new THREE.DirectionalLight(0xff4500, 1);
-    directionalLight.position.set(10, 10, 5);
-    directionalLight.castShadow = true;
-    directionalLight.shadow.mapSize.width = 2048;
-    directionalLight.shadow.mapSize.height = 2048;
-    scene.add(directionalLight);
+    // Spotlight principal inspirado en el ejemplo - este se moverá
+    const spotLight = new THREE.SpotLight(0xffffff, 100);
+    spotLight.position.set(2.5, 5, 2.5);
+    spotLight.angle = Math.PI / 6;
+    spotLight.penumbra = 1;
+    spotLight.decay = 2;
+    spotLight.distance = 0;
+    spotLight.castShadow = true;
+    spotLight.shadow.mapSize.width = 2048;
+    spotLight.shadow.mapSize.height = 2048;
+    spotLight.shadow.camera.near = 1;
+    spotLight.shadow.camera.far = 10;
+    spotLight.shadow.focus = 1;
+    scene.add(spotLight);
 
-    // Luz puntual (amarillo brillante)
-    const pointLight = new THREE.PointLight(0xffff00, 0.8, 100);
-    pointLight.position.set(-10, 5, 10);
-    scene.add(pointLight);
+    // Spotlight con color naranja para la paleta del usuario - fijo
+    const coloredSpotLight = new THREE.SpotLight(0xff6b35, 80);
+    coloredSpotLight.position.set(-2.5, 4, -2.5);
+    coloredSpotLight.angle = Math.PI / 8;
+    coloredSpotLight.penumbra = 0.8;
+    coloredSpotLight.decay = 2;
+    coloredSpotLight.castShadow = true;
+    scene.add(coloredSpotLight);
 
-    // Luz de relleno (azul oscuro)
-    const fillLight = new THREE.DirectionalLight(0x000080, 0.3);
-    fillLight.position.set(-5, -5, -5);
+    // Luz de relleno suave
+    const fillLight = new THREE.DirectionalLight(0xff8c42, 0.3);
+    fillLight.position.set(-5, -2, 5);
     scene.add(fillLight);
-
-    // Luz adicional (naranja cálido)
-    const warmLight = new THREE.PointLight(0xff8c00, 0.6, 50);
-    warmLight.position.set(5, -3, 8);
-    scene.add(warmLight);
   };
 
   const loadModel = async (scene: any, THREE: any, GLTFLoader: any) => {
-    // Por el problema de Git LFS, usamos un modelo procedural atractivo por ahora
-    console.log('🚀 Creando modelo 3D procedural - Crystal Formation');
+    console.log('🚀 Creando modelo 3D procedural - Architectural Sculpture');
     
     try {
-      // Crear un modelo procedural: formación cristalina
+      // Crear un modelo procedural: escultura arquitectónica
       const group = new THREE.Group();
       
-      // Cristales principales
-      const mainCrystalGeometry = new THREE.ConeGeometry(0.8, 3, 8);
-      const crystalMaterial = new THREE.MeshPhongMaterial({ 
-        color: 0xff6b35, 
-        transparent: true,
-        opacity: 0.8,
-        shininess: 100 
+      // Crear un plano base como en el ejemplo
+      const planeGeometry = new THREE.PlaneGeometry(8, 8);
+      const planeMaterial = new THREE.MeshLambertMaterial({ color: 0x404040 });
+      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      plane.position.set(0, -2, 0);
+      plane.rotation.x = -Math.PI / 2;
+      plane.receiveShadow = true;
+      scene.add(plane);
+      
+      // Escultura principal - estructura compleja tipo "Lucy" pero procedural
+      const sculptureGeometry = new THREE.ConeGeometry(0.8, 4, 12);
+      const sculptureMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0xff6b35,
+        transparent: false
       });
       
-      // Cristal principal
-      const mainCrystal = new THREE.Mesh(mainCrystalGeometry, crystalMaterial);
-      mainCrystal.position.set(0, 0, 0);
-      mainCrystal.castShadow = true;
-      mainCrystal.receiveShadow = true;
-      group.add(mainCrystal);
+      const mainSculpture = new THREE.Mesh(sculptureGeometry, sculptureMaterial);
+      mainSculpture.position.set(0, 0, 0);
+      mainSculpture.castShadow = true;
+      mainSculpture.receiveShadow = true;
+      group.add(mainSculpture);
       
-      // Cristales secundarios
-      for (let i = 0; i < 5; i++) {
-        const secondaryCrystalGeometry = new THREE.ConeGeometry(0.3, 1.5, 6);
-        const secondaryCrystalMaterial = new THREE.MeshPhongMaterial({ 
-          color: 0xff8c42,
-          transparent: true,
-          opacity: 0.7,
-          shininess: 80 
-        });
+      // Agregar complejidad geométrica - elementos arquitectónicos
+      // Torre principal
+      const towerGeometry = new THREE.CylinderGeometry(0.3, 0.5, 2.5, 8);
+      const towerMaterial = new THREE.MeshLambertMaterial({ color: 0xff8c42 });
+      const tower = new THREE.Mesh(towerGeometry, towerMaterial);
+      tower.position.set(0, 2.5, 0);
+      tower.castShadow = true;
+      tower.receiveShadow = true;
+      group.add(tower);
+      
+      // Elementos decorativos alrededor - como pilares
+      for (let i = 0; i < 6; i++) {
+        const pillarGeometry = new THREE.CylinderGeometry(0.15, 0.2, 1.8, 6);
+        const pillarMaterial = new THREE.MeshLambertMaterial({ color: 0xffb347 });
+        const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
         
-        const secondaryCrystal = new THREE.Mesh(secondaryCrystalGeometry, secondaryCrystalMaterial);
-        
-        // Posicionar alrededor del cristal principal
-        const angle = (i / 5) * Math.PI * 2;
-        const radius = 1.2;
-        secondaryCrystal.position.set(
+        const angle = (i / 6) * Math.PI * 2;
+        const radius = 1.8;
+        pillar.position.set(
           Math.cos(angle) * radius,
-          -0.5 + Math.random() * 0.4,
+          -0.2,
           Math.sin(angle) * radius
         );
+        pillar.castShadow = true;
+        pillar.receiveShadow = true;
+        group.add(pillar);
         
-        // Rotación aleatoria
-        secondaryCrystal.rotation.z = (Math.random() - 0.5) * 0.3;
-        secondaryCrystal.castShadow = true;
-        secondaryCrystal.receiveShadow = true;
-        
-        group.add(secondaryCrystal);
+        // Capiteles en los pilares
+        const capGeometry = new THREE.CylinderGeometry(0.25, 0.25, 0.2, 8);
+        const capMaterial = new THREE.MeshLambertMaterial({ color: 0xffd700 });
+        const cap = new THREE.Mesh(capGeometry, capMaterial);
+        cap.position.set(
+          Math.cos(angle) * radius,
+          0.7,
+          Math.sin(angle) * radius
+        );
+        cap.castShadow = true;
+        cap.receiveShadow = true;
+        group.add(cap);
       }
       
-      // Base cristalina
-      const baseGeometry = new THREE.CylinderGeometry(1.5, 2, 0.3, 12);
-      const baseMaterial = new THREE.MeshPhongMaterial({ 
-        color: 0xffb347,
+      // Estructura superior - como una corona
+      const crownGeometry = new THREE.RingGeometry(0.8, 1.2, 12);
+      const crownMaterial = new THREE.MeshLambertMaterial({ 
+        color: 0xff6b35,
+        side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.6 
+        opacity: 0.8
       });
+      const crown = new THREE.Mesh(crownGeometry, crownMaterial);
+      crown.position.set(0, 3.5, 0);
+      crown.rotation.x = Math.PI / 2;
+      crown.castShadow = true;
+      crown.receiveShadow = true;
+      group.add(crown);
       
-      const base = new THREE.Mesh(baseGeometry, baseMaterial);
-      base.position.set(0, -1.5, 0);
-      base.castShadow = true;
-      base.receiveShadow = true;
-      group.add(base);
-      
-      // Partículas flotantes
-      const particleGeometry = new THREE.SphereGeometry(0.02, 4, 4);
-      const particleMaterial = new THREE.MeshBasicMaterial({ 
-        color: 0xffd700,
-        transparent: true,
-        opacity: 0.8 
-      });
-      
-      for (let i = 0; i < 15; i++) {
-        const particle = new THREE.Mesh(particleGeometry, particleMaterial);
-        particle.position.set(
-          (Math.random() - 0.5) * 4,
-          (Math.random() - 0.5) * 4 + 1,
-          (Math.random() - 0.5) * 4
+      // Detalles finales - orbes flotantes
+      for (let i = 0; i < 8; i++) {
+        const orbGeometry = new THREE.SphereGeometry(0.08, 8, 8);
+        const orbMaterial = new THREE.MeshLambertMaterial({ 
+          color: 0xffd700,
+          transparent: true,
+          opacity: 0.9
+        });
+        const orb = new THREE.Mesh(orbGeometry, orbMaterial);
+        
+        const angle = (i / 8) * Math.PI * 2;
+        const height = 1.5 + Math.sin(i) * 0.5;
+        const radius = 1.3;
+        
+        orb.position.set(
+          Math.cos(angle) * radius,
+          height,
+          Math.sin(angle) * radius
         );
-        group.add(particle);
+        orb.castShadow = true;
+        group.add(orb);
       }
       
       // Guardar referencia del modelo
       modelRef.current = group;
       
       // Escalar y posicionar
-      group.scale.setScalar(1.5);
+      group.scale.setScalar(1.2);
       group.position.set(0, 0, -5);
       
       scene.add(group);
       
-      console.log('✅ Modelo procedural Crystal Formation creado exitosamente');
+      console.log('✅ Modelo procedural Architectural Sculpture creado exitosamente');
       
       // Hacer una rotación inicial después de cargar
       setTimeout(() => {
