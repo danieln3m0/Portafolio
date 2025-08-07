@@ -11,6 +11,13 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Referencias para el movimiento suave de cámara
+  const scrollVelocityRef = useRef(0);
+  const lastScrollTimeRef = useRef(Date.now());
+  const lastScrollYRef = useRef(0);
+  const cameraTargetRef = useRef({ x: 0, y: 0, z: 15 });
+  const cameraCurrentRef = useRef({ x: 0, y: 0, z: 15 });
 
   // Debug: log cuando se inicializa el hook
   console.log('🔧 useThreeScene inicializado con sección:', currentSection);
@@ -63,7 +70,7 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       // Cargar modelo
       await loadModel(scene, THREE, GLTFLoader);
 
-      // Iniciar loop de renderizado con animación de luces
+      // Iniciar loop de renderizado con animación de luces y cámara
       const animate = () => {
         requestAnimationFrame(animate);
         
@@ -78,6 +85,24 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
               mainSpotlight.position.z = Math.sin(time) * 2.5;
             }
           }
+        }
+        
+        // Animación suave de cámara basada en scroll
+        if (cameraRef.current) {
+          const lerpFactor = 0.05; // Factor de suavizado (más bajo = más suave)
+          
+          cameraCurrentRef.current.x += (cameraTargetRef.current.x - cameraCurrentRef.current.x) * lerpFactor;
+          cameraCurrentRef.current.y += (cameraTargetRef.current.y - cameraCurrentRef.current.y) * lerpFactor;
+          cameraCurrentRef.current.z += (cameraTargetRef.current.z - cameraCurrentRef.current.z) * lerpFactor;
+          
+          cameraRef.current.position.set(
+            cameraCurrentRef.current.x,
+            cameraCurrentRef.current.y,
+            cameraCurrentRef.current.z
+          );
+          
+          // La cámara siempre mira hacia el modelo
+          cameraRef.current.lookAt(0, 0, -5);
         }
         
         renderer.render(scene, camera);
@@ -408,12 +433,43 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
   };
 
   const handleScroll = () => {
+    const currentTime = Date.now();
+    const currentScrollY = window.scrollY;
+    
+    // Calcular velocidad de scroll
+    const deltaTime = currentTime - lastScrollTimeRef.current;
+    const deltaScroll = currentScrollY - lastScrollYRef.current;
+    
+    if (deltaTime > 0) {
+      scrollVelocityRef.current = Math.abs(deltaScroll) / deltaTime;
+    }
+    
+    // Actualizar referencias
+    lastScrollTimeRef.current = currentTime;
+    lastScrollYRef.current = currentScrollY;
+    
+    // Calcular nueva posición de cámara basada en scroll y velocidad
+    const scrollProgress = currentScrollY / (document.documentElement.scrollHeight - window.innerHeight);
+    const velocityMultiplier = Math.min(scrollVelocityRef.current * 50, 10); // Limitar el efecto
+    
+    // Movimiento dinámico de cámara
+    const baseDistance = 15;
+    const scrollInfluence = scrollProgress * 8; // Influencia del progreso de scroll
+    const velocityInfluence = velocityMultiplier * 0.5; // Influencia de la velocidad
+    
+    // Posición objetivo de la cámara
+    cameraTargetRef.current = {
+      x: Math.sin(scrollProgress * Math.PI * 2) * (2 + velocityInfluence), // Movimiento circular horizontal
+      y: Math.cos(scrollProgress * Math.PI) * (1.5 + velocityInfluence * 0.5), // Movimiento vertical
+      z: baseDistance + scrollInfluence + velocityInfluence // Acercamiento/alejamiento
+    };
+    
     // Limpiar timeout anterior si existe
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current);
     }
 
-    // Debounce: esperar 300ms después de que termine el scroll para más control
+    // Debounce: esperar 300ms después de que termine el scroll para rotar el modelo
     scrollTimeoutRef.current = setTimeout(() => {
       console.log('🌀 Scroll detectado - activando rotación controlada');
       rotateModelRandomly();
