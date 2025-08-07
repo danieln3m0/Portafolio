@@ -51,8 +51,6 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       rendererRef.current = renderer;
 
       // Limpiar container y agregar canvas
@@ -108,12 +106,6 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
     spotLight.penumbra = 1;
     spotLight.decay = 2;
     spotLight.distance = 0;
-    spotLight.castShadow = true;
-    spotLight.shadow.mapSize.width = 2048;
-    spotLight.shadow.mapSize.height = 2048;
-    spotLight.shadow.camera.near = 1;
-    spotLight.shadow.camera.far = 10;
-    spotLight.shadow.focus = 1;
     scene.add(spotLight);
 
     // Spotlight con color naranja para la paleta del usuario - fijo
@@ -122,7 +114,6 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
     coloredSpotLight.angle = Math.PI / 8;
     coloredSpotLight.penumbra = 0.8;
     coloredSpotLight.decay = 2;
-    coloredSpotLight.castShadow = true;
     scene.add(coloredSpotLight);
 
     // Luz de relleno suave
@@ -135,15 +126,6 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
     console.log('🚀 Cargando modelo GLTF real con manejo de CORS');
     
     try {
-      // Crear un plano base para recibir sombras
-      const planeGeometry = new THREE.PlaneGeometry(10, 10);
-      const planeMaterial = new THREE.MeshLambertMaterial({ color: 0x404040 });
-      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-      plane.position.set(0, -2, 0);
-      plane.rotation.x = -Math.PI / 2;
-      plane.receiveShadow = true;
-      scene.add(plane);
-      
       // URLs directas de Netlify
       const gltfUrl = 'https://jovial-tanuki-bee826.netlify.app/scene.gltf';
       const binUrl = 'https://jovial-tanuki-bee826.netlify.app/scene.bin';
@@ -262,7 +244,7 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       
       // Escalar el modelo basado en su tamaño
       const maxDimension = Math.max(size.x, size.y, size.z);
-      const targetSize = 4; // Tamaño objetivo
+      const targetSize = 19; // Tamaño objetivo
       const scale = targetSize / maxDimension;
       model.scale.setScalar(scale);
       
@@ -271,12 +253,9 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       // Posicionar el modelo en la escena
       model.position.set(0, 0, -5);
       
-      // Configurar sombras para todos los meshes del modelo
+      // Configurar materiales para todos los meshes del modelo
       model.traverse((child: any) => {
         if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-          
           // Mejorar los materiales para mejor iluminación
           if (child.material) {
             child.material.needsUpdate = true;
@@ -300,15 +279,6 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       // Fallback: usar el modelo procedural arquitectónico
       const group = new THREE.Group();
       
-      // Crear un plano base como en el ejemplo
-      const planeGeometry = new THREE.PlaneGeometry(8, 8);
-      const planeMaterial = new THREE.MeshLambertMaterial({ color: 0x404040 });
-      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-      plane.position.set(0, -2, 0);
-      plane.rotation.x = -Math.PI / 2;
-      plane.receiveShadow = true;
-      scene.add(plane);
-      
       // Escultura principal - estructura compleja tipo "Lucy" pero procedural
       const sculptureGeometry = new THREE.ConeGeometry(0.8, 4, 12);
       const sculptureMaterial = new THREE.MeshLambertMaterial({ 
@@ -318,8 +288,6 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       
       const mainSculpture = new THREE.Mesh(sculptureGeometry, sculptureMaterial);
       mainSculpture.position.set(0, 0, 0);
-      mainSculpture.castShadow = true;
-      mainSculpture.receiveShadow = true;
       group.add(mainSculpture);
       
       // Torre principal
@@ -327,8 +295,6 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       const towerMaterial = new THREE.MeshLambertMaterial({ color: 0xff8c42 });
       const tower = new THREE.Mesh(towerGeometry, towerMaterial);
       tower.position.set(0, 2.5, 0);
-      tower.castShadow = true;
-      tower.receiveShadow = true;
       group.add(tower);
       
       // Elementos decorativos alrededor - como pilares
@@ -344,8 +310,6 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
           -0.2,
           Math.sin(angle) * radius
         );
-        pillar.castShadow = true;
-        pillar.receiveShadow = true;
         group.add(pillar);
         
         // Capiteles en los pilares
@@ -357,8 +321,6 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
           0.7,
           Math.sin(angle) * radius
         );
-        cap.castShadow = true;
-        cap.receiveShadow = true;
         group.add(cap);
       }
       
