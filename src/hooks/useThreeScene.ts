@@ -132,10 +132,172 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
   };
 
   const loadModel = async (scene: any, THREE: any, GLTFLoader: any) => {
-    console.log('🚀 Creando modelo 3D procedural - Architectural Sculpture');
+    console.log('🚀 Cargando modelo GLTF real con manejo de CORS');
     
     try {
-      // Crear un modelo procedural: escultura arquitectónica
+      // Crear un plano base para recibir sombras
+      const planeGeometry = new THREE.PlaneGeometry(10, 10);
+      const planeMaterial = new THREE.MeshLambertMaterial({ color: 0x404040 });
+      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      plane.position.set(0, -2, 0);
+      plane.rotation.x = -Math.PI / 2;
+      plane.receiveShadow = true;
+      scene.add(plane);
+      
+      // URLs directas de Netlify
+      const gltfUrl = 'https://jovial-tanuki-bee826.netlify.app/scene.gltf';
+      const binUrl = 'https://jovial-tanuki-bee826.netlify.app/scene.bin';
+      
+      console.log('📥 Descargando archivos GLTF manualmente...');
+      
+      // Descargar el archivo GLTF manualmente
+      const gltfResponse = await fetch(gltfUrl, {
+        mode: 'cors', // Intentar CORS primero
+        headers: {
+          'Accept': 'application/json, model/gltf+json, */*'
+        }
+      }).catch(async () => {
+        // Si CORS falla, usar proxy público
+        console.log('🔄 CORS falló, intentando con proxy público...');
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(gltfUrl)}`;
+        return await fetch(proxyUrl);
+      });
+      
+      if (!gltfResponse.ok) {
+        throw new Error(`No se pudo descargar GLTF: ${gltfResponse.status}`);
+      }
+      
+      const gltfText = await gltfResponse.text();
+      const gltfData = JSON.parse(gltfText);
+      
+      console.log('✅ Archivo GLTF descargado y parseado');
+      
+      // Descargar el archivo binario manualmente
+      const binResponse = await fetch(binUrl, {
+        mode: 'cors'
+      }).catch(async () => {
+        // Si CORS falla, usar proxy público
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(binUrl)}`;
+        return await fetch(proxyUrl);
+      });
+      
+      if (!binResponse.ok) {
+        throw new Error(`No se pudo descargar BIN: ${binResponse.status}`);
+      }
+      
+      const binData = await binResponse.arrayBuffer();
+      console.log('✅ Archivo binario descargado:', binData.byteLength, 'bytes');
+      
+      // Crear un blob URL para el archivo binario
+      const binBlob = new Blob([binData], { type: 'application/octet-stream' });
+      const binBlobUrl = URL.createObjectURL(binBlob);
+      
+      // Modificar las referencias en el GLTF para usar el blob URL
+      if (gltfData.buffers) {
+        gltfData.buffers = gltfData.buffers.map((buffer: any) => {
+          if (buffer.uri && buffer.uri.includes('scene.bin')) {
+            return {
+              ...buffer,
+              uri: binBlobUrl
+            };
+          }
+          return buffer;
+        });
+      }
+      
+      // Crear un blob URL para el archivo GLTF modificado
+      const modifiedGltfText = JSON.stringify(gltfData);
+      const gltfBlob = new Blob([modifiedGltfText], { type: 'model/gltf+json' });
+      const gltfBlobUrl = URL.createObjectURL(gltfBlob);
+      
+      console.log('🔧 Archivos convertidos a blob URLs, cargando con GLTFLoader...');
+      
+      // Cargar usando GLTFLoader con el blob URL
+      const loader = new GLTFLoader();
+      const gltf = await new Promise((resolve, reject) => {
+        loader.load(
+          gltfBlobUrl,
+          (loadedGltf: any) => {
+            console.log('✅ Modelo GLTF cargado exitosamente desde blob URLs');
+            resolve(loadedGltf);
+          },
+          (progress: any) => {
+            if (progress.total > 0) {
+              const percentage = (progress.loaded / progress.total * 100).toFixed(1);
+              console.log('📊 Progreso de carga:', percentage + '%');
+            }
+          },
+          (error: any) => {
+            console.error('❌ Error cargando modelo GLTF desde blob:', error);
+            reject(error);
+          }
+        );
+      });
+
+      // Limpiar blob URLs para evitar memory leaks
+      URL.revokeObjectURL(gltfBlobUrl);
+      URL.revokeObjectURL(binBlobUrl);
+
+      console.log('✅ Modelo GLTF procesado correctamente');
+      const model = (gltf as any).scene;
+      
+      // Guardar referencia del modelo
+      modelRef.current = model;
+      
+      // Calcular el centro del modelo para posicionarlo correctamente
+      const box = new THREE.Box3().setFromObject(model);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      
+      console.log('📐 Dimensiones del modelo:', {
+        width: size.x.toFixed(2),
+        height: size.y.toFixed(2),
+        depth: size.z.toFixed(2)
+      });
+      
+      // Centrar el modelo en el origen
+      model.position.x = -center.x;
+      model.position.y = -center.y;
+      model.position.z = -center.z;
+      
+      // Escalar el modelo basado en su tamaño
+      const maxDimension = Math.max(size.x, size.y, size.z);
+      const targetSize = 4; // Tamaño objetivo
+      const scale = targetSize / maxDimension;
+      model.scale.setScalar(scale);
+      
+      console.log('🎯 Escala aplicada:', scale.toFixed(3));
+      
+      // Posicionar el modelo en la escena
+      model.position.set(0, 0, -5);
+      
+      // Configurar sombras para todos los meshes del modelo
+      model.traverse((child: any) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          
+          // Mejorar los materiales para mejor iluminación
+          if (child.material) {
+            child.material.needsUpdate = true;
+          }
+        }
+      });
+
+      scene.add(model);
+      
+      console.log('✅ Modelo GLTF real añadido a la escena');
+      
+      // Hacer una rotación inicial después de cargar
+      setTimeout(() => {
+        console.log('🎲 Ejecutando rotación inicial del modelo GLTF');
+        rotateModelRandomly();
+      }, 1000);
+      
+    } catch (error) {
+      console.warn('❌ No se pudo cargar el modelo GLTF, usando modelo procedural de respaldo:', error);
+      
+      // Fallback: usar el modelo procedural arquitectónico
       const group = new THREE.Group();
       
       // Crear un plano base como en el ejemplo
@@ -160,7 +322,6 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       mainSculpture.receiveShadow = true;
       group.add(mainSculpture);
       
-      // Agregar complejidad geométrica - elementos arquitectónicos
       // Torre principal
       const towerGeometry = new THREE.CylinderGeometry(0.3, 0.5, 2.5, 8);
       const towerMaterial = new THREE.MeshLambertMaterial({ color: 0xff8c42 });
@@ -201,45 +362,7 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
         group.add(cap);
       }
       
-      // Estructura superior - como una corona
-      const crownGeometry = new THREE.RingGeometry(0.8, 1.2, 12);
-      const crownMaterial = new THREE.MeshLambertMaterial({ 
-        color: 0xff6b35,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.8
-      });
-      const crown = new THREE.Mesh(crownGeometry, crownMaterial);
-      crown.position.set(0, 3.5, 0);
-      crown.rotation.x = Math.PI / 2;
-      crown.castShadow = true;
-      crown.receiveShadow = true;
-      group.add(crown);
-      
-      // Detalles finales - orbes flotantes
-      for (let i = 0; i < 8; i++) {
-        const orbGeometry = new THREE.SphereGeometry(0.08, 8, 8);
-        const orbMaterial = new THREE.MeshLambertMaterial({ 
-          color: 0xffd700,
-          transparent: true,
-          opacity: 0.9
-        });
-        const orb = new THREE.Mesh(orbGeometry, orbMaterial);
-        
-        const angle = (i / 8) * Math.PI * 2;
-        const height = 1.5 + Math.sin(i) * 0.5;
-        const radius = 1.3;
-        
-        orb.position.set(
-          Math.cos(angle) * radius,
-          height,
-          Math.sin(angle) * radius
-        );
-        orb.castShadow = true;
-        group.add(orb);
-      }
-      
-      // Guardar referencia del modelo
+      // Guardar referencia del modelo de respaldo
       modelRef.current = group;
       
       // Escalar y posicionar
@@ -248,43 +371,10 @@ export const useThreeScene = (containerRef: React.RefObject<HTMLDivElement>, cur
       
       scene.add(group);
       
-      console.log('✅ Modelo procedural Architectural Sculpture creado exitosamente');
-      
-      // Hacer una rotación inicial después de cargar
-      setTimeout(() => {
-        console.log('🎲 Ejecutando rotación inicial del modelo');
-        rotateModelRandomly();
-      }, 1000);
-      
-    } catch (error) {
-      console.warn('Error creando modelo procedural, usando cubo de respaldo:', error);
-      
-      // Cubo de respaldo naranja como última opción
-      const geometry = new THREE.BoxGeometry(2, 2, 2);
-      const material = new THREE.MeshPhongMaterial({ 
-        color: 0xff8c00,
-        shininess: 100 
-      });
-      const cube = new THREE.Mesh(geometry, material);
-      cube.castShadow = true;
-      cube.receiveShadow = true;
-      cube.position.set(0, 0, -5);
-      
-      modelRef.current = cube;
-      
-      const animateCube = () => {
-        if (modelRef.current === cube) {
-          cube.rotation.x += 0.01;
-          cube.rotation.y += 0.01;
-        }
-        requestAnimationFrame(animateCube);
-      };
-      animateCube();
-      
-      scene.add(cube);
+      console.log('✅ Modelo procedural de respaldo creado');
       
       setTimeout(() => {
-        console.log('🎲 Ejecutando rotación inicial del cubo');
+        console.log('🎲 Ejecutando rotación inicial del modelo de respaldo');
         rotateModelRandomly();
       }, 1000);
     }
