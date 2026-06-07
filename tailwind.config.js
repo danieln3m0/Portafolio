@@ -1,42 +1,37 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        // Lenguaje itssharl.ee: blanco roto calido + texto indigo/pizarra.
+        // El color vive en los blobs iridiscentes y el glow, no en la UI.
+        paper: '#eae9e5',       // blanco roto calido (fondo dominante)
+        'paper-2': '#e2e1dc',   // superficie / tarjeta clara
+        slate: '#646787',       // tarjeta oscura periwinkle (media)
+        ink: '#3a3c58',         // texto principal (indigo pizarra)
+        muted: '#7e80a1',       // texto secundario (periwinkle)
+        line: 'var(--line)',    // hairlines
+        mint: '#9fe8cb',        // resplandor de acento
       },
       fontFamily: {
-        mono: ['var(--font-geist-mono)'],
+        display: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
-      animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
-        'slide-up': 'slideUp 0.6s ease-out',
-        'slide-in-left': 'slideInLeft 0.6s ease-out',
-        'slide-in-right': 'slideInRight 0.6s ease-out',
+      maxWidth: {
+        shell: '1340px',
       },
       keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
+        'fade-up': {
+          '0%': { opacity: '0', transform: 'translateY(24px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
-        slideUp: {
-          '0%': { transform: 'translateY(30px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
-        },
-        slideInLeft: {
-          '0%': { transform: 'translateX(-30px)', opacity: '0' },
-          '100%': { transform: 'translateX(0)', opacity: '1' },
-        },
-        slideInRight: {
-          '0%': { transform: 'translateX(30px)', opacity: '0' },
-          '100%': { transform: 'translateX(0)', opacity: '1' },
-        },
+      },
+      animation: {
+        'fade-up': 'fade-up 0.7s cubic-bezier(0.16,1,0.3,1) both',
       },
     },
   },

@@ -3,207 +3,166 @@
 @tailwind utilities;
 
 /* ============================================================
-   Tema "Fire in the Sky" — paleta fuego sobre cielo nocturno
+   Materializacion de las formas (lenguaje itssharl.ee)
+   Blanco roto calido + texto indigo/pizarra, grano sutil y
+   blobs iridiscentes glossy como unica fuente de color.
    ============================================================ */
 :root {
-  --background: #0a0a0f;        /* Casi negro con tinte azul nocturno */
-  --foreground: #ededed;
-
-  /* Paleta principal */
-  --fire-red: #ff4500;          /* Rojo anaranjado - llamas */
-  --fire-orange: #ff8c00;       /* Naranja cálido - transiciones */
-  --fire-amber: #fbbf24;        /* Ámbar - núcleos de luz */
-  --sky-night: #12121f;         /* Azul muy oscuro - cielo */
-  --ember: rgba(255, 140, 0, 0.6);
-
-  /* Gradientes temáticos */
-  --gradient-fire: linear-gradient(135deg, var(--fire-red), var(--fire-orange));
-  --gradient-flame: linear-gradient(45deg, var(--fire-amber), var(--fire-red), var(--fire-orange));
+  --paper: #eae9e5;
+  --paper-2: #e2e1dc;
+  --slate: #646787;
+  --ink: #3a3c58;
+  --muted: #7e80a1;
+  --mint: #9fe8cb;
+  --line: rgba(58, 60, 88, 0.16);
 }
 
-/* El portafolio es de tema oscuro por diseño: lo forzamos para evitar
-   que navegadores en modo claro vuelvan el fondo blanco con texto blanco. */
+html,
+body {
+  height: 100%;
+}
+
 html {
-  color-scheme: dark;
-  scroll-behavior: smooth;
+  color-scheme: light;
+  background-color: var(--paper);
 }
 
 body {
-  color: var(--foreground);
-  background-color: var(--background);
-  /* Resplandor sutil tipo brasas para dar profundidad al fondo 3D */
-  background-image:
-    radial-gradient(60rem 60rem at 15% -10%, rgba(255, 69, 0, 0.10), transparent 60%),
-    radial-gradient(50rem 50rem at 110% 20%, rgba(255, 140, 0, 0.08), transparent 55%);
-  background-attachment: fixed;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--ink);
+  background-color: var(--paper);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 300;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
-/* ============================================================
-   Fondo 3D (Three.js)
-   ============================================================ */
-.three-background {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  z-index: -1 !important;
-  pointer-events: none !important;
-}
-
-/* ============================================================
-   Glassmorphism
-   ============================================================ */
-.glass {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Borde cálido al pasar el cursor sobre tarjetas glass */
-.glass:hover {
-  border-color: rgba(255, 140, 0, 0.35);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 140, 0, 0.10);
-}
-
-/* ============================================================
-   Texto con gradiente animado (tema fuego)
-   ============================================================ */
-.gradient-text {
-  background: var(--gradient-flame);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: gradient-shift 6s ease-in-out infinite;
-}
-
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-/* ============================================================
-   Animaciones de elementos flotantes (manchas de luz del Hero)
-   ============================================================ */
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-20px) rotate(4deg); }
-  66% { transform: translateY(10px) rotate(-3deg); }
-}
-
-.floating-shape {
-  animation: float 7s ease-in-out infinite;
-}
-
-/* ============================================================
-   Microinteracciones
-   ============================================================ */
-.hover-lift {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
-}
-
-.hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-}
-
-.btn-primary {
-  position: relative;
+  /* SPA por vistas: sin scroll de página; el scroll vive dentro de cada vista. */
   overflow: hidden;
 }
 
-/* Brillo que cruza el botón al hacer hover */
-.btn-primary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-  transition: left 0.6s;
+/* ============================================================
+   Tipografia: geometrica, titulares pesados en mayusculas
+   ============================================================ */
+.display {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
 }
-
-.btn-primary:hover::before {
-  left: 100%;
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+/* Nombre con contorno (relleno transparente), como en la referencia */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.6px var(--ink);
+  paint-order: stroke fill;
 }
 
 /* ============================================================
-   Accesibilidad: foco visible
+   Enlaces tipo flecha y subrayado que crece
+   ============================================================ */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ink);
+  font-weight: 400;
+}
+.cta svg { transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.cta:hover svg { transform: translateX(4px); }
+
+.link-underline { position: relative; display: inline-block; }
+.link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.link-underline:hover::after { transform: scaleX(1); }
+
+/* ============================================================
+   Tarjeta media redondeada (contenedor de proyectos)
+   ============================================================ */
+.card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--slate);
+}
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(0.45) contrast(1.02);
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), filter 0.7s ease;
+}
+.group:hover .card img,
+.card:hover img {
+  transform: scale(1.04);
+  filter: grayscale(0) contrast(1.04);
+}
+
+/* ============================================================
+   Grano fijo y resplandor menta de esquina
+   ============================================================ */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.glow-mint {
+  position: fixed;
+  top: -18vh;
+  right: -10vw;
+  width: 60vw;
+  height: 60vh;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(159, 232, 203, 0.55), transparent 70%);
+  filter: blur(20px);
+}
+
+/* ============================================================
+   Foco accesible, scrollbar, seleccion
    ============================================================ */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--fire-orange);
-  outline-offset: 3px;
-  border-radius: 4px;
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
 }
 
-/* ============================================================
-   Scrollbar y selección (armonizadas con el tema fuego)
-   ============================================================ */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.04);
-}
-
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--paper); }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 140, 0, 0.5);
-  border-radius: 4px;
+  background: #c9c8c1;
+  border: 3px solid var(--paper);
+  border-radius: 999px;
 }
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 140, 0, 0.8);
-}
-
-::selection {
-  background: rgba(255, 69, 0, 0.35);
-  color: #fff;
-}
+::selection { background: var(--mint); color: var(--ink); }
 
 /* ============================================================
-   Optimizaciones móviles
-   ============================================================ */
-@media (max-width: 768px) {
-  .three-background {
-    transform: scale(0.8);
-    transform-origin: center;
-  }
-
-  .glass {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-}
-
-/* ============================================================
-   Respeto a usuarios que prefieren menos movimiento
+   Movimiento reducido
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }

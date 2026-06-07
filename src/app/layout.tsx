@@ -1,13 +1,20 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Outfit } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'], display: 'swap' })
+// Tipografía geométrica única: Outfit. Pesos ligeros (200/300) para el cuerpo
+// y descripciones, pesos fuertes (700/800) en mayúsculas para los titulares.
+const sans = Outfit({
+  subsets: ['latin'],
+  weight: ['200', '300', '400', '500', '700', '800'],
+  display: 'swap',
+  variable: '--font-sans',
+})
 
 const siteUrl = 'https://danieln3m0.github.io/Portafolio'
-const title = 'Francis Daniel Mamani Silva — Full Stack Developer'
+const title = 'Francis Daniel Mamani Silva · Desarrollador Full-Stack & Creative Coding'
 const description =
-  'Portafolio de Francis Daniel Mamani Silva, estudiante de Ingeniería de Software en UPC (17.5/20) y desarrollador Full Stack con Next.js, React, Spring Boot, Java y Python.'
+  'Portafolio de Francis Daniel Mamani Silva. Materializo formas con código: interfaces, sistemas y experiencias web construidas con React, Next.js, Java y Python.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -18,27 +25,24 @@ export const metadata: Metadata = {
   description,
   keywords: [
     'Francis Daniel Mamani Silva',
-    'full stack developer',
+    'desarrollador full stack',
+    'front-end',
+    'creative coding',
     'ingeniería de software',
     'UPC',
     'Lima Perú',
     'React',
     'Next.js',
-    'Spring Boot',
-    'Java',
-    'Python',
     'TypeScript',
   ],
   authors: [{ name: 'Francis Daniel Mamani Silva', url: siteUrl }],
   creator: 'Francis Daniel Mamani Silva',
-  alternates: {
-    canonical: '/',
-  },
+  alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     locale: 'es_PE',
     url: siteUrl,
-    siteName: 'Portafolio · Francis Daniel Mamani Silva',
+    siteName: 'Francis Daniel Mamani Silva',
     title,
     description,
   },
@@ -50,30 +54,20 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-image-preview': 'large',
-    },
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
   },
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0a0a0f',
+  themeColor: '#f4f2ec',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className="scroll-smooth">
-      <body className={inter.className}>
-        {children}
-      </body>
+    <html lang="es" className={sans.variable}>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   )
 }
