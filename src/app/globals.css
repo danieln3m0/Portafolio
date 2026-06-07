@@ -2,100 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   Tema "Fire in the Sky" — paleta fuego sobre cielo nocturno
+   ============================================================ */
 :root {
-  /* Paleta "Fire in the Sky" */
-  --background: rgba(10, 10, 10, 0.95); /* Negro/Gris oscuro para fondo */
+  --background: #0a0a0f;        /* Casi negro con tinte azul nocturno */
   --foreground: #ededed;
-  --cursor-color: #ff4500; /* Rojo anaranjado */
-  
-  /* Colores principales del tema Fire in the Sky */
-  --fire-red: #ff4500; /* Rojo anaranjado - llamas */
-  --fire-yellow: #ffff00; /* Amarillo brillante - núcleos de luz */
-  --sky-blue: #1a1a3d; /* Azul oscuro - fondo nocturno */
-  --shadow-dark: #0a0a0a; /* Negro/Gris oscuro - siluetas */
-  --fire-orange: #ff8c00; /* Naranja cálido - transiciones */
-  
+
+  /* Paleta principal */
+  --fire-red: #ff4500;          /* Rojo anaranjado - llamas */
+  --fire-orange: #ff8c00;       /* Naranja cálido - transiciones */
+  --fire-amber: #fbbf24;        /* Ámbar - núcleos de luz */
+  --sky-night: #12121f;         /* Azul muy oscuro - cielo */
+  --ember: rgba(255, 140, 0, 0.6);
+
   /* Gradientes temáticos */
   --gradient-fire: linear-gradient(135deg, var(--fire-red), var(--fire-orange));
-  --gradient-sky: linear-gradient(135deg, var(--sky-blue), var(--shadow-dark));
-  --gradient-flame: linear-gradient(45deg, var(--fire-yellow), var(--fire-red), var(--fire-orange));
+  --gradient-flame: linear-gradient(45deg, var(--fire-amber), var(--fire-red), var(--fire-orange));
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #ffffff;
-    --foreground: #171717;
-  }
+/* El portafolio es de tema oscuro por diseño: lo forzamos para evitar
+   que navegadores en modo claro vuelvan el fondo blanco con texto blanco. */
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
 }
-
-/* COMENTADO TEMPORALMENTE: cursor personalizado
-* {
-  cursor: none;
-}
-*/
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background-color: var(--background);
+  /* Resplandor sutil tipo brasas para dar profundidad al fondo 3D */
+  background-image:
+    radial-gradient(60rem 60rem at 15% -10%, rgba(255, 69, 0, 0.10), transparent 60%),
+    radial-gradient(50rem 50rem at 110% 20%, rgba(255, 140, 0, 0.08), transparent 55%);
+  background-attachment: fixed;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  /* cursor: none; COMENTADO TEMPORALMENTE */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
-
-/* COMENTADO TEMPORALMENTE: Custom Cursor
-.custom-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 20px;
-  height: 20px;
-  background: var(--cursor-color);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  transition: all 0.1s ease;
-  transform: translate(-50%, -50%);
-  mix-blend-mode: difference;
-}
-
-.custom-cursor.hover {
-  width: 40px;
-  height: 40px;
-  background: rgba(59, 130, 246, 0.3);
-  border: 2px solid var(--cursor-color);
-}
-
-.custom-cursor.hero {
-  --cursor-color: #f59e0b;
-}
-
-.custom-cursor.about {
-  --cursor-color: #10b981;
-}
-
-.custom-cursor.experience {
-  --cursor-color: #8b5cf6;
-}
-
-.custom-cursor.education {
-  --cursor-color: #ef4444;
-}
-
-.custom-cursor.skills {
-  --cursor-color: #06b6d4;
-}
-
-.custom-cursor.projects {
-  --cursor-color: #f97316;
-}
-
-.custom-cursor.certifications {
-  --cursor-color: #84cc16;
-}
-
-.custom-cursor.contact {
-  --cursor-color: #ec4899;
-}
-*/
 
 @layer utilities {
   .text-balance {
@@ -103,17 +47,9 @@ body {
   }
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-/* Three.js Background Styles */
+/* ============================================================
+   Fondo 3D (Three.js)
+   ============================================================ */
 .three-background {
   position: fixed !important;
   top: 0 !important;
@@ -124,48 +60,60 @@ html {
   pointer-events: none !important;
 }
 
-/* Glass effect improvements for 3D background */
+/* ============================================================
+   Glassmorphism
+   ============================================================ */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Enhanced gradients for better visibility over 3D background */
+/* Borde cálido al pasar el cursor sobre tarjetas glass */
+.glass:hover {
+  border-color: rgba(255, 140, 0, 0.35);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 140, 0, 0.10);
+}
+
+/* ============================================================
+   Texto con gradiente animado (tema fuego)
+   ============================================================ */
 .gradient-text {
-  background: linear-gradient(135deg, 
-    #ff6b6b 0%, 
-    #4ecdc4 25%, 
-    #45b7d1 50%, 
-    #96ceb4 75%, 
-    #ffecd2 100%);
+  background: var(--gradient-flame);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-size: 400% 400%;
-  animation: gradientShift 8s ease infinite;
+  color: transparent;
+  animation: gradient-shift 6s ease-in-out infinite;
 }
 
-@keyframes gradientShift {
+@keyframes gradient-shift {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
 
-/* Floating animation for background elements */
+/* ============================================================
+   Animaciones de elementos flotantes (manchas de luz del Hero)
+   ============================================================ */
 @keyframes float {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-20px) rotate(5deg); }
+  33% { transform: translateY(-20px) rotate(4deg); }
   66% { transform: translateY(10px) rotate(-3deg); }
 }
 
 .floating-shape {
-  animation: float 6s ease-in-out infinite;
+  animation: float 7s ease-in-out infinite;
 }
 
-/* Button hover effects */
+/* ============================================================
+   Microinteracciones
+   ============================================================ */
 .hover-lift {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
 }
 
 .hover-lift:hover {
@@ -178,6 +126,7 @@ html {
   overflow: hidden;
 }
 
+/* Brillo que cruza el botón al hacer hover */
 .btn-primary::before {
   content: '';
   position: absolute;
@@ -185,128 +134,76 @@ html {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transition: left 0.6s;
 }
 
 .btn-primary:hover::before {
   left: 100%;
 }
 
-/* Optimizations for mobile devices */
+/* ============================================================
+   Accesibilidad: foco visible
+   ============================================================ */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--fire-orange);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   Scrollbar y selección (armonizadas con el tema fuego)
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 140, 0, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 140, 0, 0.8);
+}
+
+::selection {
+  background: rgba(255, 69, 0, 0.35);
+  color: #fff;
+}
+
+/* ============================================================
+   Optimizaciones móviles
+   ============================================================ */
 @media (max-width: 768px) {
   .three-background {
     transform: scale(0.8);
     transform-origin: center;
   }
-  
+
   .glass {
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.5);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.8);
-}
-
-/* Selection */
-::selection {
-  background: rgba(59, 130, 246, 0.3);
-  color: white;
-}
-
-/* Gradient text - Fire in the Sky theme */
-.gradient-text {
-  background: var(--gradient-flame);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradient-shift 4s ease-in-out infinite;
-}
-
-@keyframes gradient-shift {
-  0%, 100% {
-    background-position: 0% 50%;
+/* ============================================================
+   Respeto a usuarios que prefieren menos movimiento
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-/* Glassmorphism effect */
-.glass {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-/* Animated background */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-.floating-shape {
-  animation: float 6s ease-in-out infinite;
-}
-
-/* Text reveal animation */
-.text-reveal {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: reveal 0.8s ease-out forwards;
-}
-
-@keyframes reveal {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Hover effects */
-.hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.hover-lift:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-}
-
-/* Button animations */
-.btn-primary {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.btn-primary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.btn-primary:hover::before {
-  left: 100%;
 }

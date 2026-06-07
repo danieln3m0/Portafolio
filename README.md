@@ -1,67 +1,77 @@
-# Portfolio Francis Daniel Mamani Silva
+# Portafolio · Francis Daniel Mamani Silva
 
-Portafolio personal de Francis Daniel Mamani Silva, estudiante de 6to semestre de Ingeniería de Sistemas en la Universidad Mayor de San Andrés (UMSA).
+Portafolio personal de Francis Daniel Mamani Silva, estudiante de Ingeniería de Software en la Universidad Peruana de Ciencias Aplicadas (UPC), con promedio de 17.5/20 (tercio superior).
 
-## 🎓 Sobre Mí
+## 🎓 Sobre mí
 
-Estudiante apasionado por el desarrollo de software y la programación. Con experiencia en múltiples lenguajes de programación y tecnologías web modernas. Participante activo en programación competitiva y siempre en busca de nuevos desafíos tecnológicos.
+Desarrollador Full Stack apasionado por crear soluciones escalables y bien documentadas. Experiencia práctica con Next.js, Spring Boot, React y tecnologías modernas, además de programación competitiva y metodologías ágiles.
 
-## 🚀 Características del Portafolio
+## 🚀 Características del portafolio
 
-- **Diseño Moderno**: Inspirado en portafolios profesionales con efectos glassmorphism y gradientes
-- **Navegación Fluida**: Single Page Application (SPA) con navegación suave
-- **Animaciones**: Implementadas con Framer Motion para una experiencia visual atractiva
-- **Responsive**: Totalmente adaptado para dispositivos móviles y escritorio
-- **Optimizado**: Construido con Next.js 15 para máximo rendimiento
+- **Diseño moderno**: tema "Fire in the Sky" con glassmorphism y gradientes animados
+- **Navegación fluida**: Single Page Application (SPA) con scroll suave e indicador de sección
+- **Animaciones**: Framer Motion para una experiencia visual atractiva
+- **Fondo 3D**: escena interactiva con Three.js
+- **Responsive**: adaptado a móvil y escritorio
+- **Optimizado**: construido con Next.js 15 (export estático)
 
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Tecnologías
 
 - **Frontend**: Next.js 15, React 18, TypeScript
 - **Estilos**: Tailwind CSS
 - **Animaciones**: Framer Motion
-- **Iconos**: Lucide React
-- **Deploy**: Vercel (recomendado)
+- **3D**: Three.js
+- **Iconos**: lucide-react
+- **Deploy**: GitHub Pages
 
-## � Secciones del Portafolio
+## 📑 Secciones
 
-1. **Hero Section**: Presentación personal con información de contacto
-2. **Sobre Mí**: Información académica y personal
-3. **Experiencia**: Actividades académicas y proyectos
-4. **Educación**: Formación universitaria y secundaria
-5. **Habilidades**: Lenguajes de programación y tecnologías por categorías
-6. **Proyectos**: Proyectos académicos y personales destacados
-7. **Contacto**: Formulario de contacto e información
+1. **Hero**: presentación e información de contacto
+2. **Sobre mí**: información académica y personal
+3. **Experiencia**: actividades profesionales y proyectos
+4. **Educación**: formación universitaria
+5. **Habilidades**: lenguajes y tecnologías por categorías
+6. **Proyectos**: proyectos destacados
+7. **Certificaciones**: certificaciones obtenidas
+8. **Contacto**: formulario (vía WhatsApp) e información
 
-## 🎯 Habilidades Destacadas
+## 🧰 Desarrollo
 
-### Lenguajes de Programación
-- Java, Python, C++
-- JavaScript, TypeScript, PHP
-- SQL y bases de datos
+```bash
+npm install      # instalar dependencias
+npm run dev      # entorno de desarrollo (http://localhost:3000)
+npm run build    # build estático para producción
+npm run lint     # linter
+```
 
-### Desarrollo Web
-- HTML5, CSS3, React, Next.js
-- Node.js, Express.js
-- Bootstrap, Tailwind CSS
+## 🎯 Habilidades destacadas
 
-### Otros
-- Algoritmos y Estructuras de Datos
-- Programación Competitiva
-- Git y control de versiones
+### Lenguajes de programación
+- Python, Java (Spring Boot), C++
+- Kotlin, PHP, JavaScript/TypeScript
 
-## � Contacto
+### Desarrollo web
+- React, Next.js, Angular, Vue
+- Node.js, Express, Flutter
+- Tailwind CSS
 
-- **Email**: francisdanielmamani@gmail.com
-- **Teléfono**: +591 70607924
-- **Ubicación**: La Paz, Bolivia
-- **LinkedIn**: [francis-daniel-mamani](https://linkedin.com/in/francis-daniel-mamani)
-- **GitHub**: [francis-daniel-mamani](https://github.com/francis-daniel-mamani)
+### Bases de datos y herramientas
+- MySQL, PostgreSQL, MongoDB, Redis
+- Docker, Git, Linux, Firebase, Supabase, Azure
+
+## 📫 Contacto
+
+- **Email**: francisdani143@gmail.com
+- **WhatsApp**: +51 935 018 631
+- **Ubicación**: Lima, Perú
+- **LinkedIn**: [francis-daniel-mamani-silva](https://www.linkedin.com/in/francis-daniel-mamani-silva-562ab6307/)
+- **GitHub**: [danieln3m0](https://github.com/danieln3m0)
 
 ## 👤 Autor
 
-**Francis Daniel Mamani Silva**  
-Estudiante de Ingeniería de Software - Universidad Peruana de Ciencias Aplicadas (UPC)
-8to Semestre
+**Francis Daniel Mamani Silva**
+Estudiante de Ingeniería de Software — Universidad Peruana de Ciencias Aplicadas (UPC)
+Graduación esperada: Diciembre 2026
 
 ---
 

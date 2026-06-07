@@ -4,49 +4,23 @@ import { motion } from 'framer-motion'
 import { Github, Linkedin, Mail, MapPin, Phone, ExternalLink, Download, Code, Database, Globe, Server } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import ThreeBackground from '@/components/ThreeBackground'
-// import ThreeTest from '@/components/ThreeTest'
 import SectionIndicator from '@/components/SectionIndicator'
 
 export default function Home() {
   const [mounted, setMounted] = useState(false)
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [cursorVariant, setCursorVariant] = useState('default')
-  const [isHovering, setIsHovering] = useState(false)
   const [currentSection, setCurrentSection] = useState('hero')
-
-  // Debug: log cuando cambia la sección actual
-  useEffect(() => {
-    console.log('🏠 currentSection actualizado en page.tsx:', currentSection);
-  }, [currentSection]);
 
   useEffect(() => {
     setMounted(true)
-    
-    // COMENTADO: Funcionalidad del cursor personalizado
-    // const handleMouseMove = (e: MouseEvent) => {
-    //   setMousePosition({ x: e.clientX, y: e.clientY })
-    // }
 
-    // const handleSectionEnter = (sectionName: string) => {
-    //   setCursorVariant(sectionName)
-    //   setCurrentSection(sectionName) // Agregar esta línea para actualizar la sección actual
-    // }
-
-    // Add event listeners
-    // document.addEventListener('mousemove', handleMouseMove)
-    
-    // Section observers
+    // Detecta la sección visible para el indicador y el fondo 3D
     const sections = document.querySelectorAll('section')
-    console.log('🔍 Secciones encontradas:', sections.length, Array.from(sections).map(s => s.id));
-    
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const sectionId = entry.target.id
-            console.log('👁️ Sección detectada:', sectionId);
-            // setCursorVariant(sectionId)  // COMENTADO: cursor personalizado
-            setCurrentSection(sectionId) // Actualizar también aquí
+            setCurrentSection(entry.target.id)
           }
         })
       },
@@ -55,10 +29,7 @@ export default function Home() {
 
     sections.forEach((section) => observer.observe(section))
 
-    return () => {
-      // document.removeEventListener('mousemove', handleMouseMove)
-      observer.disconnect()
-    }
+    return () => observer.disconnect()
   }, [])
 
   if (!mounted) return null
@@ -67,51 +38,24 @@ export default function Home() {
     <main className="min-h-screen relative">
       {/* Fondo 3D con Three.js */}
       <ThreeBackground currentSection={currentSection} />
-      
+
       {/* Indicador de sección */}
       <SectionIndicator currentSection={currentSection} />
-      
-      {/* Custom Cursor - COMENTADO TEMPORALMENTE
-      <div
-        className={`custom-cursor ${cursorVariant} ${isHovering ? 'hover' : ''}`}
-        style={{
-          left: mousePosition.x,
-          top: mousePosition.y,
-        }}
-      />
-      */}
-      
-      {/* Navigation */}
-      <Navigation setIsHovering={setIsHovering} />
-      
-      {/* Hero Section */}
-      <HeroSection setIsHovering={setIsHovering} />
-      
-      {/* About Section */}
-      <AboutSection setIsHovering={setIsHovering} />
-      
-      {/* Experience Section */}
-      <ExperienceSection setIsHovering={setIsHovering} />
-      
-      {/* Education Section */}
-      <EducationSection setIsHovering={setIsHovering} />
-      
-      {/* Skills Section */}
-      <SkillsSection setIsHovering={setIsHovering} />
-      
-      {/* Projects Section */}
-      <ProjectsSection setIsHovering={setIsHovering} />
-      
-      {/* Certifications Section */}
-      <CertificationsSection setIsHovering={setIsHovering} />
-      
-      {/* Contact Section */}
-      <ContactSection setIsHovering={setIsHovering} />
+
+      <Navigation />
+      <HeroSection />
+      <AboutSection />
+      <ExperienceSection />
+      <EducationSection />
+      <SkillsSection />
+      <ProjectsSection />
+      <CertificationsSection />
+      <ContactSection />
     </main>
   )
 }
 
-function Navigation({ setIsHovering }: { setIsHovering: (hovering: boolean) => void }) {
+function Navigation() {
   const navItems = [
     { href: '#hero', label: 'Inicio' },
     { href: '#about', label: 'Sobre mí' },
@@ -124,21 +68,21 @@ function Navigation({ setIsHovering }: { setIsHovering: (hovering: boolean) => v
   ]
 
   return (
-    <motion.nav 
+    <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-xl font-bold gradient-text"
           >
             Francis Daniel
           </motion.div>
-          
+
           <div className="hidden md:flex space-x-8">
             {navItems.map((item, index) => (
               <motion.a
@@ -148,8 +92,6 @@ function Navigation({ setIsHovering }: { setIsHovering: (hovering: boolean) => v
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 className="text-gray-300 hover:text-white transition-colors duration-300 font-medium tracking-wide"
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
               >
                 {item.label}
               </motion.a>
@@ -161,24 +103,24 @@ function Navigation({ setIsHovering }: { setIsHovering: (hovering: boolean) => v
   )
 }
 
-function HeroSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => void }) {
+function HeroSection() {
   return (
     <section id="hero" className="min-h-screen flex items-center justify-center px-4 pt-20 relative overflow-hidden">
-      {/* Animated background shapes - Fire in the Sky theme */}
+      {/* Manchas de luz animadas - tema Fire in the Sky */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="floating-shape absolute top-20 left-10 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl"></div>
         <div className="floating-shape absolute bottom-20 right-10 w-96 h-96 bg-red-500/15 rounded-full blur-3xl" style={{ animationDelay: '2s' }}></div>
         <div className="floating-shape absolute top-1/2 left-1/2 w-80 h-80 bg-yellow-500/8 rounded-full blur-3xl" style={{ animationDelay: '4s' }}></div>
       </div>
-      
+
       <div className="max-w-6xl mx-auto text-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <motion.h1 
-            className="text-6xl md:text-8xl lg:text-9xl font-black mb-6 leading-none tracking-tight"
+          <motion.h1
+            className="text-6xl md:text-8xl lg:text-9xl font-black mb-6 leading-none tracking-tight text-balance"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
@@ -186,8 +128,8 @@ function HeroSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => 
             <span className="text-white block">FRANCIS</span>
             <span className="gradient-text block">DANIEL</span>
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -195,37 +137,33 @@ function HeroSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => 
           >
             SOFTWARE ENGINEERING STUDENT & FULL STACK DEVELOPER
           </motion.p>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-lg md:text-xl text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed"
+            className="text-lg md:text-xl text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed text-balance"
           >
-            Estudiante de Ingeniería de Software en UPC con promedio de 17.5/20. 
+            Estudiante de Ingeniería de Software en UPC con promedio de 17.5/20.
             Experiencia en desarrollo Full Stack con Next.js, Spring Boot, React y tecnologías modernas.
           </motion.p>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
             className="flex flex-col sm:flex-row gap-6 justify-center items-center"
           >
-            <a 
+            <a
               href="#contact"
               className="btn-primary bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-10 py-4 rounded-full transition-all duration-300 flex items-center gap-3 text-lg font-semibold hover-lift"
-              onMouseEnter={() => setIsHovering(true)}
-              onMouseLeave={() => setIsHovering(false)}
             >
               <Mail size={24} />
               Contactar
             </a>
-            <a 
+            <a
               href="/cv.pdf"
               className="border-2 border-orange-400/50 hover:border-orange-400/80 text-white px-10 py-4 rounded-full transition-all duration-300 flex items-center gap-3 text-lg font-semibold hover-lift"
-              onMouseEnter={() => setIsHovering(true)}
-              onMouseLeave={() => setIsHovering(false)}
             >
               <Download size={24} />
               Descargar CV
@@ -237,7 +175,7 @@ function HeroSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => 
   )
 }
 
-function AboutSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => void }) {
+function AboutSection() {
   return (
     <section id="about" className="py-20 px-4">
       <div className="max-w-6xl mx-auto">
@@ -251,7 +189,7 @@ function AboutSection({ setIsHovering }: { setIsHovering: (hovering: boolean) =>
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">Sobre Mí</h2>
           <div className="w-24 h-1 bg-gradient-to-r from-orange-600 to-red-600 mx-auto mb-8"></div>
         </motion.div>
-        
+
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -260,13 +198,13 @@ function AboutSection({ setIsHovering }: { setIsHovering: (hovering: boolean) =>
             transition={{ duration: 0.8 }}
           >
             <p className="text-lg text-gray-300 mb-6 leading-relaxed font-light">
-              Soy estudiante de Ingeniería de Software en la Universidad Peruana de Ciencias Aplicadas (UPC) 
-              con un promedio académico de 17.5/20, ubicándome en el tercio superior de mi carrera. 
+              Soy estudiante de Ingeniería de Software en la Universidad Peruana de Ciencias Aplicadas (UPC)
+              con un promedio académico de 17.5/20, ubicándome en el tercio superior de mi carrera.
               Me especializo en desarrollo Full Stack con experiencia práctica en múltiples tecnologías.
             </p>
             <p className="text-lg text-gray-300 mb-6 leading-relaxed font-light">
-              Durante mi formación he trabajado en proyectos reales como interno de desarrollo Full Stack, 
-              construyendo sistemas de seguimiento en tiempo real, APIs REST seguras y plataformas web completas. 
+              Durante mi formación he trabajado en proyectos reales como interno de desarrollo Full Stack,
+              construyendo sistemas de seguimiento en tiempo real, APIs REST seguras y plataformas web completas.
               Mi enfoque se centra en crear soluciones escalables y bien documentadas.
             </p>
             <div className="grid grid-cols-2 gap-4 text-gray-300">
@@ -280,7 +218,7 @@ function AboutSection({ setIsHovering }: { setIsHovering: (hovering: boolean) =>
               </div>
             </div>
           </motion.div>
-          
+
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -311,7 +249,7 @@ function AboutSection({ setIsHovering }: { setIsHovering: (hovering: boolean) =>
   )
 }
 
-function ExperienceSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => void }) {
+function ExperienceSection() {
   const experiences = [
     {
       title: "Full Stack Developer Intern",
@@ -336,7 +274,7 @@ function ExperienceSection({ setIsHovering }: { setIsHovering: (hovering: boolea
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">Experiencia</h2>
           <div className="w-24 h-1 bg-gradient-to-r from-red-600 to-orange-600 mx-auto mb-8"></div>
         </motion.div>
-        
+
         <div className="space-y-8">
           {experiences.map((exp, index) => (
             <motion.div
@@ -355,9 +293,9 @@ function ExperienceSection({ setIsHovering }: { setIsHovering: (hovering: boolea
                 </div>
                 <div className="text-gray-300 font-medium mt-4 lg:mt-0">{exp.period}</div>
               </div>
-              
+
               <p className="text-gray-300 mb-6 leading-relaxed">{exp.description}</p>
-              
+
               <div className="flex flex-wrap gap-2">
                 {exp.technologies.map((tech, techIndex) => (
                   <span
@@ -376,7 +314,7 @@ function ExperienceSection({ setIsHovering }: { setIsHovering: (hovering: boolea
   )
 }
 
-function EducationSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => void }) {
+function EducationSection() {
   const education = [
     {
       degree: "Ingeniería de Software",
@@ -402,7 +340,7 @@ function EducationSection({ setIsHovering }: { setIsHovering: (hovering: boolean
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">Educación</h2>
           <div className="w-24 h-1 bg-gradient-to-r from-red-600 to-orange-600 mx-auto mb-8"></div>
         </motion.div>
-        
+
         <div className="space-y-8">
           {education.map((edu, index) => (
             <motion.div
@@ -422,9 +360,9 @@ function EducationSection({ setIsHovering }: { setIsHovering: (hovering: boolean
                 </div>
                 <div className="text-gray-300 font-medium mt-4 lg:mt-0">{edu.period}</div>
               </div>
-              
+
               <p className="text-gray-300 mb-6 leading-relaxed">{edu.description}</p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {edu.subjects.map((subject, subjectIndex) => (
                   <span
@@ -443,7 +381,7 @@ function EducationSection({ setIsHovering }: { setIsHovering: (hovering: boolean
   )
 }
 
-function SkillsSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => void }) {
+function SkillsSection() {
   const skillCategories = [
     {
       title: "Lenguajes de Programación",
@@ -480,7 +418,7 @@ function SkillsSection({ setIsHovering }: { setIsHovering: (hovering: boolean) =
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">Habilidades</h2>
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-orange-500 mx-auto mb-8"></div>
         </motion.div>
-        
+
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {skillCategories.map((category, index) => (
             <motion.div
@@ -510,7 +448,7 @@ function SkillsSection({ setIsHovering }: { setIsHovering: (hovering: boolean) =
   )
 }
 
-function ProjectsSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => void }) {
+function ProjectsSection() {
   const projects = [
     {
       title: "Transportify",
@@ -563,7 +501,7 @@ function ProjectsSection({ setIsHovering }: { setIsHovering: (hovering: boolean)
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">Proyectos Destacados</h2>
           <div className="w-24 h-1 bg-gradient-to-r from-orange-600 to-red-600 mx-auto mb-8"></div>
         </motion.div>
-        
+
         <div className="grid md:grid-cols-2 gap-8">
           {projects.map((project, index) => (
             <motion.div
@@ -577,12 +515,12 @@ function ProjectsSection({ setIsHovering }: { setIsHovering: (hovering: boolean)
               <div className="h-48 bg-gradient-to-br from-orange-600 to-red-600 flex items-center justify-center">
                 <Code className="w-16 h-16 text-white" />
               </div>
-              
+
               <div className="p-6">
                 <h3 className="text-xl font-bold text-white mb-3">{project.title}</h3>
                 <p className="text-sm text-orange-400 mb-2">{project.period}</p>
                 <p className="text-gray-300 mb-4 text-sm leading-relaxed">{project.description}</p>
-                
+
                 <div className="flex flex-wrap gap-2 mb-4">
                   {project.technologies.map((tech, techIndex) => (
                     <span
@@ -593,13 +531,11 @@ function ProjectsSection({ setIsHovering }: { setIsHovering: (hovering: boolean)
                     </span>
                   ))}
                 </div>
-                
+
                 <div className="flex gap-3">
                   <a
                     href={project.demo}
                     className="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded text-center text-sm transition-colors duration-300 flex items-center justify-center gap-2"
-                    onMouseEnter={() => setIsHovering(true)}
-                    onMouseLeave={() => setIsHovering(false)}
                   >
                     <ExternalLink size={16} />
                     Demo
@@ -607,8 +543,6 @@ function ProjectsSection({ setIsHovering }: { setIsHovering: (hovering: boolean)
                   <a
                     href={project.github}
                     className="flex-1 border border-white/30 hover:border-white/50 text-white py-2 px-4 rounded text-center text-sm transition-colors duration-300 flex items-center justify-center gap-2"
-                    onMouseEnter={() => setIsHovering(true)}
-                    onMouseLeave={() => setIsHovering(false)}
                   >
                     <Github size={16} />
                     Código
@@ -623,7 +557,7 @@ function ProjectsSection({ setIsHovering }: { setIsHovering: (hovering: boolean)
   )
 }
 
-function CertificationsSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => void }) {
+function CertificationsSection() {
   const certifications = [
     {
       title: "Introduction to MongoDB",
@@ -670,7 +604,7 @@ function CertificationsSection({ setIsHovering }: { setIsHovering: (hovering: bo
           <h2 className="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">Certificaciones</h2>
           <div className="w-24 h-1 bg-gradient-to-r from-yellow-600 to-orange-600 mx-auto mb-8"></div>
         </motion.div>
-        
+
         <div className="grid md:grid-cols-2 gap-8">
           {certifications.map((cert, index) => (
             <motion.div
@@ -697,7 +631,7 @@ function CertificationsSection({ setIsHovering }: { setIsHovering: (hovering: bo
   )
 }
 
-function ContactSection({ setIsHovering }: { setIsHovering: (hovering: boolean) => void }) {
+function ContactSection() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -714,35 +648,29 @@ function ContactSection({ setIsHovering }: { setIsHovering: (hovering: boolean) 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validar que todos los campos estén llenos
+
     if (!formData.name || !formData.email || !formData.message) {
       alert('Por favor, completa todos los campos');
       return;
     }
 
-    // Crear el mensaje para WhatsApp
-    const whatsappMessage = `¡Hola Francis! 
+    // Arma el mensaje para WhatsApp
+    const whatsappMessage = `¡Hola Francis!
 
 Me llamo *${formData.name}* y me gustaría contactarte.
 
 Este es *Mi email:* ${formData.email}
 
-Mi mensaje: 
+Mi mensaje:
 ${formData.message}
 
 ¡Espero tu respuesta!`;
 
-    // Codificar el mensaje para URL
     const encodedMessage = encodeURIComponent(whatsappMessage);
-    
-    // URL de WhatsApp (reemplaza con tu número de teléfono)
     const whatsappURL = `https://wa.me/51935018631?text=${encodedMessage}`;
-    
-    // Abrir WhatsApp en una nueva ventana
+
     window.open(whatsappURL, '_blank');
-    
-    // Limpiar el formulario después del envío
+
     setFormData({
       name: '',
       email: '',
@@ -764,7 +692,7 @@ ${formData.message}
           <div className="w-24 h-1 bg-gradient-to-r from-orange-600 to-red-600 mx-auto mb-8"></div>
           <p className="text-xl text-gray-300 font-light">¿Tienes un proyecto en mente? ¡Hablemos!</p>
         </motion.div>
-        
+
         <div className="grid md:grid-cols-2 gap-12">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -773,60 +701,58 @@ ${formData.message}
             transition={{ duration: 0.8 }}
           >
             <h3 className="text-2xl font-bold text-white mb-6">Información de Contacto</h3>
-            
+
             <div className="space-y-4">
-              <a 
-                href="mailto:francisdani143@gmail.com" 
+              <a
+                href="mailto:francisdani143@gmail.com"
                 className="flex items-center gap-4 text-gray-300 hover:text-white transition-colors duration-300"
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
               >
                 <Mail className="w-6 h-6 text-orange-400" />
                 <span>francisdani143@gmail.com</span>
               </a>
-              
-              <a 
-                href="https://www.linkedin.com/in/francis-daniel-mamani-silva-562ab6307/" 
+
+              <a
+                href="https://www.linkedin.com/in/francis-daniel-mamani-silva-562ab6307/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-4 text-gray-300 hover:text-white transition-colors duration-300"
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
               >
                 <Linkedin className="w-6 h-6 text-orange-400" />
                 <span>linkedin.com/in/francis-daniel-mamani-silva</span>
               </a>
-              
-              <a 
-                href="https://github.com/danieln3m0" 
+
+              <a
+                href="https://github.com/danieln3m0"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-4 text-gray-300 hover:text-white transition-colors duration-300"
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
               >
                 <Github className="w-6 h-6 text-orange-400" />
-                <span>github.com/francis-daniel-mamani-silva</span>
+                <span>github.com/danieln3m0</span>
               </a>
 
-              <a 
-                href="https://wa.me/51935018631" 
+              <a
+                href="https://wa.me/51935018631"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-4 text-gray-300 hover:text-white transition-colors duration-300"
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
               >
                 <Phone className="w-6 h-6 text-orange-400" />
                 <span>+51 935 018 631</span>
               </a>
-              
+
               <div className="flex items-center gap-4 text-gray-300">
                 <MapPin className="w-6 h-6 text-orange-400" />
                 <span>Lima, Perú</span>
               </div>
-              
+
               <div className="flex items-center gap-4 text-gray-300">
                 <span className="w-6 h-6 text-orange-400 flex items-center justify-center">🎓</span>
                 <span>Disponible desde Agosto 2025</span>
               </div>
             </div>
           </motion.div>
-          
+
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -846,7 +772,7 @@ ${formData.message}
                   required
                 />
               </div>
-              
+
               <div>
                 <input
                   type="email"
@@ -858,7 +784,7 @@ ${formData.message}
                   required
                 />
               </div>
-              
+
               <div>
                 <textarea
                   name="message"
@@ -870,12 +796,10 @@ ${formData.message}
                   required
                 ></textarea>
               </div>
-              
+
               <button
                 type="submit"
                 className="w-full btn-primary bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg transition-colors duration-300 hover-lift flex items-center justify-center gap-2"
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-2.462-.996-4.779-2.811-6.598-1.815-1.819-4.145-2.817-6.607-2.819-5.448 0-9.886 4.435-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.279-.456zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
