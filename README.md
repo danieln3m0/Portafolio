@@ -45,5 +45,5 @@ npm run lint     # linter
 - **Email**: francisdani143@gmail.com
 - **LinkedIn**: [francis-daniel-mamani-silva](https://www.linkedin.com/in/francis-daniel-mamani-silva-562ab6307/)
 - **GitHub**: [danieln3m0](https://github.com/danieln3m0)
-- **WhatsApp**: +51 935 018 631
+- **WhatsApp**: +51 910 547 175
 - **Ubicación**: Lima, Perú
