@@ -67,6 +67,18 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={sans.variable}>
+      <head>
+        {/* GitHub Pages no permite cabeceras HTTP propias; la CSP va por meta.
+            'unsafe-inline' en script-src es necesario para los scripts de
+            hidratación que Next.js incrusta en la exportación estática.
+            Solo en producción: next dev necesita eval para los source maps. */}
+        {process.env.NODE_ENV === 'production' && (
+          <meta
+            httpEquiv="Content-Security-Policy"
+            content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://picsum.photos https://fastly.picsum.photos; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+          />
+        )}
+      </head>
       <body className="font-sans antialiased">{children}</body>
     </html>
   )

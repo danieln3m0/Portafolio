@@ -151,7 +151,8 @@ export const channels: Channel[] = [
   { label: 'Email', value: 'francisdani143@gmail.com', href: 'mailto:francisdani143@gmail.com' },
   { label: 'LinkedIn', value: 'in/francis-daniel-mamani-silva', href: 'https://www.linkedin.com/in/francis-daniel-mamani-silva-562ab6307/' },
   { label: 'GitHub', value: 'github.com/danieln3m0', href: 'https://github.com/danieln3m0' },
-  { label: 'WhatsApp', value: '+51 910 547 175', href: 'https://wa.me/51910547175' },
+  // El número no se muestra en el HTML para evitar scraping; el chat se abre vía wa.me.
+  { label: 'WhatsApp', value: 'Mensaje directo', href: 'https://wa.me/51910547175' },
 ]
 
 // Coloca tu CV en public/cv.pdf (ruta relativa para que funcione en GitHub Pages).

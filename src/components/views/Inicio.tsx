@@ -10,7 +10,7 @@ const EASE = [0.16, 1, 0.3, 1] as const
 function Name({ children }: { children: React.ReactNode }) {
   const enter = (e: React.PointerEvent) => {
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
-    clusterOn(r.left + r.width / 2, r.top + r.height / 2)
+    clusterOn(r.left + r.width / 2, r.top + r.height / 2, r.width, r.height)
   }
   return (
     <span
