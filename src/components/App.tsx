@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import BlobField from './BlobField'
 import Nav from './Nav'
@@ -9,7 +9,7 @@ import Proyectos from './views/Proyectos'
 import ProyectoDetalle from './views/ProyectoDetalle'
 import SobreMi from './views/SobreMi'
 import Contacto from './views/Contacto'
-import { clusterOff, type View } from '@/lib/cluster'
+import { blobView, clusterOff, type View } from '@/lib/cluster'
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
@@ -17,6 +17,11 @@ export default function App() {
   const [view, setView] = useState<View>('inicio')
   const [project, setProject] = useState(0)
   const reduce = useReducedMotion()
+
+  // Avisa al fondo del cambio de vista/proyecto (agrupar, opacar, recolorear).
+  useEffect(() => {
+    blobView(view, project)
+  }, [view, project])
 
   const navigate = useCallback((v: View) => {
     clusterOff()
@@ -68,7 +73,7 @@ export default function App() {
           animate={variants ? 'animate' : undefined}
           exit={variants ? 'exit' : undefined}
           transition={{ duration: 0.45, ease: EASE }}
-          className="absolute inset-0 z-10"
+          className="absolute inset-0"
         >
           {render()}
         </motion.main>

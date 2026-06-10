@@ -16,7 +16,7 @@ function Name({ children }: { children: React.ReactNode }) {
     <span
       onPointerEnter={enter}
       onPointerLeave={clusterOff}
-      className="text-outline cursor-default transition-opacity hover:opacity-80"
+      className="text-outline name-line cursor-default"
     >
       {children}
     </span>

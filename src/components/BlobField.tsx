@@ -31,6 +31,27 @@ const PALETTE: Pair[] = [
   ['#f3eca6', '#f6c5c9'],
 ]
 
+// Tinte del fondo según el proyecto activo (se recorre en bucle por índice).
+const PROJECT_THEMES: Pair[] = [
+  ['#a8ecc9', '#7fd3c4'],
+  ['#f7c0c4', '#ffb27a'],
+  ['#cabdf2', '#9fb6f6'],
+  ['#bfeede', '#79c4f5'],
+  ['#f3eca6', '#f49ab4'],
+  ['#ffc8a8', '#f78bb0'],
+]
+
+type RGB = [number, number, number]
+
+function parseHex(hex: string): RGB {
+  const n = parseInt(hex.slice(1), 16)
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
+
+function mixRGB(a: RGB, b: RGB, t: number): RGB {
+  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]
+}
+
 // Anclas relativas (fracción de viewport) para enmarcar el centro sin taparlo.
 const ANCHORS = [
   { x: 0.13, y: 0.24, r: 0.15, elong: 1.25, depth: 0.05 },
@@ -131,6 +152,7 @@ function buildNeighbors(): number[][] {
 export default function BlobField() {
   const glowRef = useRef<HTMLCanvasElement>(null)
   const gooRef = useRef<HTMLCanvasElement>(null)
+  const veilRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const glowCanvas = glowRef.current
@@ -171,6 +193,20 @@ export default function BlobField() {
     const splash = { active: false, x: 0, y: 0, w: 0, h: 0 }
     let splashAmt = 0
     let wasSplash = false
+    // Estado de vista: agrupar (proyectos), opacar (detalle) y tinte de color.
+    let gatherActive = false
+    let detailActive = false
+    let wasGather = false
+    let gatherAmt = 0
+    let dimAmt = 0
+    let tintAmt = 0
+    const themeNow: [RGB, RGB] = [parseHex(PROJECT_THEMES[0][0]), parseHex(PROJECT_THEMES[0][1])]
+    const themeTarget: [RGB, RGB] = [parseHex(PROJECT_THEMES[0][0]), parseHex(PROJECT_THEMES[0][1])]
+    const setProjectTheme = (i: number) => {
+      const th = PROJECT_THEMES[((i % PROJECT_THEMES.length) + PROJECT_THEMES.length) % PROJECT_THEMES.length]
+      themeTarget[0] = parseHex(th[0])
+      themeTarget[1] = parseHex(th[1])
+    }
     let emitTimer = 1.2
     let raf = 0
     let t = 0
@@ -266,9 +302,13 @@ export default function BlobField() {
 
     const fillBody = (x: number, y: number, r: number, elong: number, colors: Pair) => {
       const rmax = r * elong
+      // Mezcla el color base con el tinte del proyecto (tintAmt 0 = sin teñir).
+      const k = tintAmt * 0.6
+      const c0 = mixRGB(lightenRGB(parseHex(colors[0]), 0.28), themeNow[0], k)
+      const c1 = mixRGB(parseHex(colors[1]), themeNow[1], k)
       const grad = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, rmax)
-      grad.addColorStop(0, lighten(colors[0], 0.28))
-      grad.addColorStop(1, colors[1])
+      grad.addColorStop(0, rgbStr(c0))
+      grad.addColorStop(1, rgbStr(c1))
       ctx.fillStyle = grad
       ctx.fill()
     }
@@ -340,15 +380,27 @@ export default function BlobField() {
     }
 
     const step = (dt: number) => {
-      // Al entrar al splash, recoge las gotas en vuelo (toda la masa se reúne).
-      if (splash.active && !wasSplash) {
+      // Tweens de vista: tinte del proyecto, agrupamiento y opacidad del detalle.
+      for (let i = 0; i < 2; i++) {
+        for (let c = 0; c < 3; c++) {
+          themeNow[i][c] += (themeTarget[i][c] - themeNow[i][c]) * 0.05
+        }
+      }
+      tintAmt += ((gatherActive || detailActive ? 1 : 0) - tintAmt) * 0.05
+      gatherAmt += ((gatherActive ? 1 : 0) - gatherAmt) * 0.08
+      dimAmt += ((detailActive ? 0.25 : 0) - dimAmt) * 0.08
+      if (veilRef.current) veilRef.current.style.opacity = String(dimAmt)
+
+      // Al entrar al splash o al agrupar, recoge las gotas en vuelo.
+      if ((splash.active && !wasSplash) || (gatherActive && !wasGather)) {
         for (const d of drops) d.active = false
       }
       wasSplash = splash.active
+      wasGather = gatherActive
       splashAmt += ((splash.active ? 1 : 0) - splashAmt) * 0.12
 
-      // Emisión de gotas solo en reposo.
-      if (!splash.active) {
+      // Emisión de gotas solo en reposo (ni splash ni agrupado en proyectos).
+      if (!splash.active && !gatherActive) {
         emitTimer -= dt
         if (emitTimer <= 0) {
           emit()
@@ -373,6 +425,15 @@ export default function BlobField() {
           const k = 0.09
           a.vx = (a.vx + (tx - a.x) * k) * 0.82
           a.vy = (a.vy + (ty - a.y) * k) * 0.82
+        } else if (gatherActive) {
+          // Vista proyectos: todas las figuras convergen en un solo cúmulo central.
+          const ang0 = (a.i / n) * Math.PI * 2 + t * 0.2
+          const ring = min * 0.06
+          const tx = w / 2 + Math.cos(ang0) * ring
+          const ty = h / 2 + Math.sin(ang0) * ring
+          const k = 0.05
+          a.vx = (a.vx + (tx - a.x) * k) * 0.86
+          a.vy = (a.vy + (ty - a.y) * k) * 0.86
         } else {
           const px = pointer.active ? (pointer.x - w / 2) * a.depth : 0
           const py = pointer.active ? (pointer.y - h / 2) * a.depth : 0
@@ -486,6 +547,16 @@ export default function BlobField() {
         splash.h = d.h ?? 0
       }
     }
+    const onView = (e: Event) => {
+      const d = (e as CustomEvent).detail as { view: string; project: number }
+      gatherActive = d.view === 'proyectos'
+      detailActive = d.view === 'detalle'
+      if (d.view === 'proyectos' || d.view === 'detalle') setProjectTheme(d.project)
+    }
+    const onProject = (e: Event) => {
+      const d = (e as CustomEvent).detail as { project: number }
+      setProjectTheme(d.project)
+    }
 
     resize()
     last = performance.now()
@@ -493,12 +564,16 @@ export default function BlobField() {
     window.addEventListener('resize', resize)
     window.addEventListener('pointermove', onMove, { passive: true })
     window.addEventListener('blobcluster', onCluster as EventListener)
+    window.addEventListener('blobview', onView as EventListener)
+    window.addEventListener('blobproject', onProject as EventListener)
 
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('blobcluster', onCluster as EventListener)
+      window.removeEventListener('blobview', onView as EventListener)
+      window.removeEventListener('blobproject', onProject as EventListener)
     }
   }, [])
 
@@ -506,6 +581,12 @@ export default function BlobField() {
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0">
       <canvas ref={glowRef} className="absolute inset-0" />
       <canvas ref={gooRef} className="absolute inset-0" style={{ filter: 'url(#blob-goo)' }} />
+      {/* Velo del color de papel: opaca el fondo ~25% en la vista de detalle. */}
+      <div
+        ref={veilRef}
+        className="absolute inset-0"
+        style={{ opacity: 0, backgroundColor: 'rgb(var(--paper))' }}
+      />
       <svg width="0" height="0" className="absolute">
         <defs>
           <filter
@@ -538,11 +619,10 @@ function hexA(hex: string, a: number) {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`
 }
 
-function lighten(hex: string, amt: number) {
-  const n = parseInt(hex.slice(1), 16)
-  const r = (n >> 16) & 255
-  const g = (n >> 8) & 255
-  const b = n & 255
-  const mix = (c: number) => Math.round(c + (255 - c) * amt)
-  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`
+function lightenRGB(c: RGB, amt: number): RGB {
+  return [c[0] + (255 - c[0]) * amt, c[1] + (255 - c[1]) * amt, c[2] + (255 - c[2]) * amt]
+}
+
+function rgbStr(c: RGB) {
+  return `rgb(${Math.round(c[0])}, ${Math.round(c[1])}, ${Math.round(c[2])})`
 }

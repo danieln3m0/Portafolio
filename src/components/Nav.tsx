@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { ArrowUpRight, X } from 'lucide-react'
+import { ArrowUpRight, Moon, Sun, X } from 'lucide-react'
 import type { View } from '@/lib/cluster'
 
 const items: { n: string; view: View; label: string }[] = [
@@ -31,6 +31,7 @@ function DotsIcon() {
 
 export default function Nav({ current, onNavigate }: { current: View; onNavigate: (v: View) => void }) {
   const [open, setOpen] = useState(false)
+  const [dark, setDark] = useState(false)
   const reduce = useReducedMotion()
   const activeView: View = current === 'detalle' ? 'proyectos' : current
 
@@ -39,6 +40,20 @@ export default function Nav({ current, onNavigate }: { current: View; onNavigate
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
+
+  // Sincroniza el estado con la clase que el script anti-parpadeo ya aplicó.
+  useEffect(() => {
+    setDark(document.documentElement.classList.contains('dark'))
+  }, [])
+
+  const toggleTheme = () => {
+    const next = !document.documentElement.classList.contains('dark')
+    document.documentElement.classList.toggle('dark', next)
+    try {
+      localStorage.setItem('theme', next ? 'dark' : 'light')
+    } catch {}
+    setDark(next)
+  }
 
   const go = (v: View) => {
     setOpen(false)
@@ -53,14 +68,23 @@ export default function Nav({ current, onNavigate }: { current: View; onNavigate
             <span className="font-medium">Francis Daniel</span>
             <span className="text-muted"> / creative coder</span>
           </button>
-          <button
-            onClick={() => setOpen(true)}
-            aria-label="Abrir menú"
-            aria-expanded={open}
-            className="grid h-10 w-10 place-items-center text-ink transition-opacity hover:opacity-60"
-          >
-            <DotsIcon />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={toggleTheme}
+              aria-label={dark ? 'Activar modo claro' : 'Activar modo oscuro'}
+              className="grid h-10 w-10 place-items-center text-ink transition-opacity hover:opacity-60"
+            >
+              {dark ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+            <button
+              onClick={() => setOpen(true)}
+              aria-label="Abrir menú"
+              aria-expanded={open}
+              className="grid h-10 w-10 place-items-center text-ink transition-opacity hover:opacity-60"
+            >
+              <DotsIcon />
+            </button>
+          </div>
         </nav>
       </header>
 
@@ -76,13 +100,22 @@ export default function Nav({ current, onNavigate }: { current: View; onNavigate
             <div className="mx-auto flex h-full max-w-shell flex-col px-5 md:px-8">
               <div className="flex h-16 items-center justify-between">
                 <span className="text-sm tracking-wide text-muted">Francis Daniel / creative coder</span>
-                <button
-                  onClick={() => setOpen(false)}
-                  aria-label="Cerrar menú"
-                  className="grid h-10 w-10 place-items-center text-ink transition-opacity hover:opacity-60"
-                >
-                  <X size={22} />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={toggleTheme}
+                    aria-label={dark ? 'Activar modo claro' : 'Activar modo oscuro'}
+                    className="grid h-10 w-10 place-items-center text-ink transition-opacity hover:opacity-60"
+                  >
+                    {dark ? <Sun size={20} /> : <Moon size={20} />}
+                  </button>
+                  <button
+                    onClick={() => setOpen(false)}
+                    aria-label="Cerrar menú"
+                    className="grid h-10 w-10 place-items-center text-ink transition-opacity hover:opacity-60"
+                  >
+                    <X size={22} />
+                  </button>
+                </div>
               </div>
 
               <nav className="flex flex-1 flex-col justify-center">

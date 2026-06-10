@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
@@ -7,15 +8,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Lenguaje itssharl.ee: blanco roto calido + texto indigo/pizarra.
+        // Tokens enlazados a variables CSS (canales RGB) para tema claro/oscuro.
         // El color vive en los blobs iridiscentes y el glow, no en la UI.
-        paper: '#eae9e5',       // blanco roto calido (fondo dominante)
-        'paper-2': '#e2e1dc',   // superficie / tarjeta clara
-        slate: '#646787',       // tarjeta oscura periwinkle (media)
-        ink: '#3a3c58',         // texto principal (indigo pizarra)
-        muted: '#7e80a1',       // texto secundario (periwinkle)
-        line: 'var(--line)',    // hairlines
-        mint: '#9fe8cb',        // resplandor de acento
+        paper: 'rgb(var(--paper) / <alpha-value>)',       // fondo dominante
+        'paper-2': 'rgb(var(--paper-2) / <alpha-value>)', // superficie / tarjeta clara
+        slate: 'rgb(var(--slate) / <alpha-value>)',       // tarjeta media periwinkle
+        ink: 'rgb(var(--ink) / <alpha-value>)',           // texto principal
+        muted: 'rgb(var(--muted) / <alpha-value>)',       // texto secundario
+        line: 'var(--line)',                              // hairlines
+        mint: 'rgb(var(--mint) / <alpha-value>)',         // resplandor de acento
       },
       fontFamily: {
         display: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],

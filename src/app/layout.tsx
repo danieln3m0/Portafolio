@@ -66,8 +66,15 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={sans.variable}>
+    <html lang="es" className={sans.variable} suppressHydrationWarning>
       <head>
+        {/* Aplica el tema guardado (o el del sistema) antes de pintar: sin parpadeo. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();",
+          }}
+        />
         {/* GitHub Pages no permite cabeceras HTTP propias; la CSP va por meta.
             'unsafe-inline' en script-src es necesario para los scripts de
             hidratación que Next.js incrusta en la exportación estática.

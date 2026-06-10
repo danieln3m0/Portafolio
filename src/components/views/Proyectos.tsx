@@ -4,12 +4,19 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
 import { projects, imgUrl } from '@/data/portfolio'
+import { blobProject } from '@/lib/cluster'
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
 export default function Proyectos({ onOpen }: { onOpen: (i: number) => void }) {
   const [active, setActive] = useState(0)
   const p = projects[active]
+
+  // Resalta un proyecto: actualiza la vista previa y tiñe el cúmulo del fondo.
+  const highlight = (i: number) => {
+    setActive(i)
+    blobProject(i)
+  }
 
   return (
     <div className="flex h-full flex-col justify-center overflow-y-auto px-5 pb-10 pt-24 md:px-8">
@@ -26,8 +33,8 @@ export default function Proyectos({ onOpen }: { onOpen: (i: number) => void }) {
               {projects.map((proj, i) => (
                 <li key={proj.title}>
                   <button
-                    onMouseEnter={() => setActive(i)}
-                    onFocus={() => setActive(i)}
+                    onMouseEnter={() => highlight(i)}
+                    onFocus={() => highlight(i)}
                     onClick={() => onOpen(i)}
                     className={`group grid w-full grid-cols-12 items-baseline gap-3 border-t border-line py-5 text-left transition-opacity ${
                       i === active ? 'opacity-100' : 'opacity-60 hover:opacity-100'

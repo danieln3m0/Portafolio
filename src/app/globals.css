@@ -7,14 +7,28 @@
    Blanco roto calido + texto indigo/pizarra, grano sutil y
    blobs iridiscentes glossy como unica fuente de color.
    ============================================================ */
+/* Variables en canales RGB ("r g b") para soportar opacidad de Tailwind
+   (rgb(var(--x) / <alpha-value>)) y el cambio de tema claro/oscuro. */
 :root {
-  --paper: #eae9e5;
-  --paper-2: #e2e1dc;
-  --slate: #646787;
-  --ink: #3a3c58;
-  --muted: #7e80a1;
-  --mint: #9fe8cb;
+  --paper: 234 233 229;
+  --paper-2: 226 225 220;
+  --slate: 100 103 135;
+  --ink: 58 60 88;
+  --muted: 126 128 161;
+  --mint: 159 232 203;
   --line: rgba(58, 60, 88, 0.16);
+}
+
+/* Modo oscuro: índigo profundo con texto lavanda claro. */
+.dark {
+  color-scheme: dark;
+  --paper: 22 23 34;
+  --paper-2: 32 33 46;
+  --slate: 116 120 152;
+  --ink: 230 230 240;
+  --muted: 150 152 184;
+  --mint: 159 232 203;
+  --line: rgba(230, 230, 240, 0.16);
 }
 
 html,
@@ -24,12 +38,12 @@ body {
 
 html {
   color-scheme: light;
-  background-color: var(--paper);
+  background-color: rgb(var(--paper));
 }
 
 body {
-  color: var(--ink);
-  background-color: var(--paper);
+  color: rgb(var(--ink));
+  background-color: rgb(var(--paper));
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-weight: 300;
   -webkit-font-smoothing: antialiased;
@@ -52,13 +66,22 @@ body {
   font-weight: 500;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: rgb(var(--muted));
 }
 /* Nombre con contorno (relleno transparente), como en la referencia */
 .text-outline {
   color: transparent;
-  -webkit-text-stroke: 1.6px var(--ink);
+  -webkit-text-stroke: 1.6px rgb(var(--ink));
   paint-order: stroke fill;
+}
+
+/* Modo oscuro: al pasar el cursor sobre el nombre, la figura clara se reúne
+   detrás. Con mix-blend-mode las letras se invierten contra el fondo: claras
+   sobre el fondo oscuro y oscuras (contrastadas) solo donde tapan la figura. */
+.dark .name-line:hover {
+  color: #fff;
+  -webkit-text-stroke-width: 0;
+  mix-blend-mode: difference;
 }
 
 /* ============================================================
@@ -68,7 +91,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--ink);
+  color: rgb(var(--ink));
   font-weight: 400;
 }
 .cta svg { transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
@@ -96,7 +119,7 @@ body {
   position: relative;
   overflow: hidden;
   border-radius: 22px;
-  background: var(--slate);
+  background: rgb(var(--slate));
 }
 .card img {
   width: 100%;
@@ -131,7 +154,7 @@ body {
   height: 60vh;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(closest-side, rgba(159, 232, 203, 0.55), transparent 70%);
+  background: radial-gradient(closest-side, rgb(var(--mint) / 0.55), transparent 70%);
   filter: blur(20px);
 }
 
@@ -142,18 +165,18 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid rgb(var(--ink));
   outline-offset: 4px;
 }
 
 ::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-track { background: rgb(var(--paper)); }
 ::-webkit-scrollbar-thumb {
-  background: #c9c8c1;
-  border: 3px solid var(--paper);
+  background: rgb(var(--muted) / 0.5);
+  border: 3px solid rgb(var(--paper));
   border-radius: 999px;
 }
-::selection { background: var(--mint); color: var(--ink); }
+::selection { background: rgb(var(--mint)); color: rgb(58 60 88); }
 
 /* ============================================================
    Movimiento reducido
