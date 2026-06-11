@@ -39,9 +39,9 @@ export default function Contacto() {
               href={c.href}
               target={c.href.startsWith('http') ? '_blank' : undefined}
               rel="noopener noreferrer"
-              className="block border-t border-line pt-4 text-left"
+              className="group block border-t border-line pt-4 text-left transition-colors duration-300 hover:border-ink/50"
             >
-              <p className="text-sm text-muted">{c.label}</p>
+              <p className="text-sm text-muted transition-colors duration-300 group-hover:text-ink">{c.label}</p>
               <span className="link-underline mt-1 inline-block text-sm">{c.value}</span>
             </a>
           ))}

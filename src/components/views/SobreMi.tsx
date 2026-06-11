@@ -53,7 +53,7 @@ export default function SobreMi() {
               href={cvUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-ink px-5 py-2.5 text-sm transition-colors hover:bg-ink hover:text-paper"
+              className="inline-flex items-center gap-2 rounded-full border border-ink px-5 py-2.5 text-sm transition-[background-color,color,transform] duration-300 hover:bg-ink hover:text-paper active:scale-[0.97]"
             >
               <FileText size={16} />
               Ver mi CV

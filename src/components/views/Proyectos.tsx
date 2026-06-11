@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
 import { projects, imgUrl } from '@/data/portfolio'
@@ -11,6 +11,14 @@ const EASE = [0.16, 1, 0.3, 1] as const
 export default function Proyectos({ onOpen }: { onOpen: (i: number) => void }) {
   const [active, setActive] = useState(0)
   const p = projects[active]
+
+  // Precarga las vistas previas: el cambio entre filas no parpadea.
+  useEffect(() => {
+    for (const proj of projects) {
+      const im = new Image()
+      im.src = imgUrl(proj.seed, 1100, 825)
+    }
+  }, [])
 
   // Resalta un proyecto: actualiza la vista previa y tiñe el cúmulo del fondo.
   const highlight = (i: number) => {
@@ -36,12 +44,27 @@ export default function Proyectos({ onOpen }: { onOpen: (i: number) => void }) {
                     onMouseEnter={() => highlight(i)}
                     onFocus={() => highlight(i)}
                     onClick={() => onOpen(i)}
-                    className={`group grid w-full grid-cols-12 items-baseline gap-3 border-t border-line py-5 text-left transition-opacity ${
+                    className={`group grid w-full grid-cols-12 items-baseline gap-3 border-t border-line py-5 text-left transition-opacity duration-300 ${
                       i === active ? 'opacity-100' : 'opacity-60 hover:opacity-100'
                     }`}
                   >
                     <span className="col-span-2 text-sm text-muted">0{i + 1}</span>
-                    <span className="col-span-7 display text-xl uppercase md:text-2xl">{proj.title}</span>
+                    <span className="col-span-7 flex items-center gap-3">
+                      <span
+                        className={`display text-xl uppercase md:text-2xl transition-transform duration-500 ease-out ${
+                          i === active ? 'md:translate-x-2' : ''
+                        }`}
+                      >
+                        {proj.title}
+                      </span>
+                      <ArrowUpRight
+                        size={18}
+                        aria-hidden="true"
+                        className={`hidden shrink-0 transition-[opacity,transform] duration-300 md:block ${
+                          i === active ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'
+                        }`}
+                      />
+                    </span>
                     <span className="col-span-3 hidden text-right text-sm text-muted sm:block">{proj.category}</span>
                   </button>
 
@@ -63,10 +86,10 @@ export default function Proyectos({ onOpen }: { onOpen: (i: number) => void }) {
               <motion.button
                 key={active}
                 onClick={() => onOpen(active)}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4, ease: EASE }}
+                initial={{ opacity: 0, y: 12, scale: 0.985, filter: 'blur(6px)' }}
+                animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, transition: { duration: 0.18 } }}
+                transition={{ duration: 0.45, ease: EASE }}
                 className="group block w-full text-left"
               >
                 <div className="card aspect-[4/3]">

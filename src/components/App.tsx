@@ -28,18 +28,44 @@ export default function App() {
     setView(v)
   }, [])
 
+  // Escape vuelve del detalle a la lista (si el menú no está abierto: Nav lo
+  // marca con data-menu-overlay y consume la tecla para cerrarse).
+  useEffect(() => {
+    if (view !== 'detalle') return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !document.querySelector('[data-menu-overlay]')) {
+        navigate('proyectos')
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [view, navigate])
+
   const openProject = useCallback((i: number) => {
     clusterOff()
     setProject(i)
     setView('detalle')
   }, [])
 
+  // Entrada lenta y desenfocada que asienta; salida corta para no hacer esperar.
   const variants = reduce
     ? undefined
     : {
-        initial: { opacity: 0, y: 14 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: -14 },
+        initial: { opacity: 0, y: 22, scale: 0.992, filter: 'blur(10px)' },
+        animate: {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          filter: 'blur(0px)',
+          transition: { duration: 0.55, ease: EASE },
+        },
+        exit: {
+          opacity: 0,
+          y: -14,
+          scale: 0.997,
+          filter: 'blur(6px)',
+          transition: { duration: 0.28, ease: [0.4, 0, 1, 1] as const },
+        },
       }
 
   const render = () => {
@@ -72,7 +98,6 @@ export default function App() {
           initial={variants ? 'initial' : false}
           animate={variants ? 'animate' : undefined}
           exit={variants ? 'exit' : undefined}
-          transition={{ duration: 0.45, ease: EASE }}
           className="absolute inset-0"
         >
           {render()}

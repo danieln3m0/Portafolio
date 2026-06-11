@@ -52,6 +52,24 @@ body {
   overflow: hidden;
 }
 
+button {
+  cursor: pointer;
+}
+
+/* Transición de tema: la clase se aplica solo durante el toggle (Nav) para no
+   animar colores en cada interacción ni en la carga inicial. */
+.theme-anim,
+.theme-anim *,
+.theme-anim *::before,
+.theme-anim *::after {
+  transition:
+    background-color 0.55s ease,
+    color 0.55s ease,
+    border-color 0.55s ease,
+    fill 0.55s ease,
+    stroke 0.55s ease !important;
+}
+
 /* ============================================================
    Tipografia: geometrica, titulares pesados en mayusculas
    ============================================================ */
@@ -60,6 +78,7 @@ body {
   font-weight: 800;
   letter-spacing: -0.01em;
   line-height: 0.95;
+  text-wrap: balance;
 }
 .eyebrow {
   font-size: 0.72rem;
@@ -95,7 +114,9 @@ body {
   font-weight: 400;
 }
 .cta svg { transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
-.cta:hover svg { transform: translateX(4px); }
+.cta:hover svg,
+.group:hover .cta svg { transform: translateX(4px); }
+.cta:active svg { transform: translateX(1px) scale(0.92); }
 
 .link-underline { position: relative; display: inline-block; }
 .link-underline::after {
@@ -110,7 +131,8 @@ body {
   transform-origin: left;
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.link-underline:hover::after { transform: scaleX(1); }
+.link-underline:hover::after,
+.group:hover .link-underline::after { transform: scaleX(1); }
 
 /* ============================================================
    Tarjeta media redondeada (contenedor de proyectos)
@@ -120,6 +142,12 @@ body {
   overflow: hidden;
   border-radius: 22px;
   background: rgb(var(--slate));
+  transition: box-shadow 0.6s ease;
+}
+/* Sombra tintada de índigo (la tinta de la paleta), nunca negro puro. */
+.group:hover .card,
+.card:hover {
+  box-shadow: 0 26px 60px -28px rgb(var(--ink) / 0.4);
 }
 .card img {
   width: 100%;

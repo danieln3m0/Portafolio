@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ArrowUpRight, Moon, Sun, X } from 'lucide-react'
 import type { View } from '@/lib/cluster'
@@ -33,13 +33,18 @@ export default function Nav({ current, onNavigate }: { current: View; onNavigate
   const [open, setOpen] = useState(false)
   const [dark, setDark] = useState(false)
   const reduce = useReducedMotion()
+  const closeRef = useRef<HTMLButtonElement>(null)
   const activeView: View = current === 'detalle' ? 'proyectos' : current
+  const activeItem = items.find((it) => it.view === activeView)
 
   useEffect(() => {
+    if (!open) return
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
     window.addEventListener('keydown', onKey)
+    // Lleva el foco al menú para poder recorrerlo con teclado de inmediato.
+    closeRef.current?.focus()
     return () => window.removeEventListener('keydown', onKey)
-  }, [])
+  }, [open])
 
   // Sincroniza el estado con la clase que el script anti-parpadeo ya aplicó.
   useEffect(() => {
@@ -47,8 +52,12 @@ export default function Nav({ current, onNavigate }: { current: View; onNavigate
   }, [])
 
   const toggleTheme = () => {
-    const next = !document.documentElement.classList.contains('dark')
-    document.documentElement.classList.toggle('dark', next)
+    const root = document.documentElement
+    const next = !root.classList.contains('dark')
+    // Anima el cruce de paleta solo durante el toggle (clase temporal).
+    root.classList.add('theme-anim')
+    window.setTimeout(() => root.classList.remove('theme-anim'), 650)
+    root.classList.toggle('dark', next)
     try {
       localStorage.setItem('theme', next ? 'dark' : 'light')
     } catch {}
@@ -69,10 +78,24 @@ export default function Nav({ current, onNavigate }: { current: View; onNavigate
             <span className="text-muted"> / creative coder</span>
           </button>
           <div className="flex items-center gap-1">
+            {/* Dónde estoy: vista actual siempre visible sin abrir el menú. */}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={activeView}
+                initial={reduce ? false : { opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduce ? undefined : { opacity: 0, y: -6 }}
+                transition={{ duration: 0.3, ease: EASE }}
+                className="mr-3 hidden text-[0.68rem] uppercase tracking-[0.22em] text-muted sm:block"
+                aria-hidden="true"
+              >
+                {activeItem?.n} · {activeItem?.label}
+              </motion.span>
+            </AnimatePresence>
             <button
               onClick={toggleTheme}
               aria-label={dark ? 'Activar modo claro' : 'Activar modo oscuro'}
-              className="grid h-10 w-10 place-items-center text-ink transition-opacity hover:opacity-60"
+              className="grid h-10 w-10 place-items-center text-ink transition-[opacity,transform] duration-200 hover:opacity-60 active:scale-90"
             >
               {dark ? <Sun size={20} /> : <Moon size={20} />}
             </button>
@@ -80,7 +103,7 @@ export default function Nav({ current, onNavigate }: { current: View; onNavigate
               onClick={() => setOpen(true)}
               aria-label="Abrir menú"
               aria-expanded={open}
-              className="grid h-10 w-10 place-items-center text-ink transition-opacity hover:opacity-60"
+              className="grid h-10 w-10 place-items-center text-ink transition-[opacity,transform] duration-200 hover:opacity-60 active:scale-90"
             >
               <DotsIcon />
             </button>
@@ -91,6 +114,7 @@ export default function Nav({ current, onNavigate }: { current: View; onNavigate
       <AnimatePresence>
         {open && (
           <motion.div
+            data-menu-overlay=""
             className="fixed inset-0 z-[70] bg-paper/85 backdrop-blur-xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -104,14 +128,15 @@ export default function Nav({ current, onNavigate }: { current: View; onNavigate
                   <button
                     onClick={toggleTheme}
                     aria-label={dark ? 'Activar modo claro' : 'Activar modo oscuro'}
-                    className="grid h-10 w-10 place-items-center text-ink transition-opacity hover:opacity-60"
+                    className="grid h-10 w-10 place-items-center text-ink transition-[opacity,transform] duration-200 hover:opacity-60 active:scale-90"
                   >
                     {dark ? <Sun size={20} /> : <Moon size={20} />}
                   </button>
                   <button
+                    ref={closeRef}
                     onClick={() => setOpen(false)}
                     aria-label="Cerrar menú"
-                    className="grid h-10 w-10 place-items-center text-ink transition-opacity hover:opacity-60"
+                    className="grid h-10 w-10 place-items-center text-ink transition-[opacity,transform] duration-200 hover:opacity-60 active:scale-90"
                   >
                     <X size={22} />
                   </button>
@@ -127,11 +152,15 @@ export default function Nav({ current, onNavigate }: { current: View; onNavigate
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.08 + i * 0.07, ease: EASE }}
                     >
-                      <button onClick={() => go(it.view)} className="group flex items-baseline gap-5 py-2 text-left">
+                      <button
+                        onClick={() => go(it.view)}
+                        aria-current={activeView === it.view ? 'page' : undefined}
+                        className="group flex items-baseline gap-5 py-2 text-left"
+                      >
                         <span className="text-sm text-muted">{it.n}</span>
                         <span
-                          className={`display text-[clamp(2.4rem,9vw,5.5rem)] uppercase leading-none transition-transform duration-500 group-hover:translate-x-3 ${
-                            activeView === it.view ? 'text-ink' : 'text-ink/35'
+                          className={`display text-[clamp(2.4rem,9vw,5.5rem)] uppercase leading-none transition-[transform,color] duration-500 group-hover:translate-x-3 ${
+                            activeView === it.view ? 'text-ink' : 'text-ink/35 group-hover:text-ink/75'
                           }`}
                         >
                           {it.label}

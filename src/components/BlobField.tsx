@@ -17,6 +17,11 @@ import { useEffect, useRef } from 'react'
  * reúne sobre el nombre y se eriza en PÚAS tipo FERROFLUIDO que palpitan, como
  * imán bajo el líquido. Al salir, fluye de vuelta a las esquinas.
  *
+ * Interacción directa: el cursor cercano estira la superficie hacia él (bulge
+ * de tensión líquida); un clic/tap emite una onda radial que aparta las masas
+ * con rebote elástico; y toda figura en movimiento se estira en la dirección
+ * de su velocidad (squash & stretch).
+ *
  * Dos lienzos: resplandor difuso (sin filtro) + cuerpos sólidos (bajo el goo).
  * Loop de rAF con refs (cero re-renders). Honra prefers-reduced-motion.
  */
@@ -82,6 +87,9 @@ type Anchor = {
   vy: number
   ox: number
   oy: number
+  // Protuberancia líquida dirigida hacia el cursor (cantidad y ángulo global).
+  bulge: number
+  bulgeAng: number
 }
 
 type Drop = {
@@ -103,6 +111,7 @@ type Drop = {
   bend: number
   colors: Pair
   phase: number
+  stretch: number
 }
 
 const POINTS = 12
@@ -134,6 +143,8 @@ function buildAnchors(w: number, h: number): Anchor[] {
       vy: 0,
       ox: 0,
       oy: 0,
+      bulge: 0,
+      bulgeAng: 0,
     }
   })
 }
@@ -187,6 +198,7 @@ export default function BlobField() {
       bend: 0,
       colors: PALETTE[0],
       phase: 0,
+      stretch: 1.4,
     }))
 
     const pointer = { x: 0, y: 0, active: false }
@@ -263,6 +275,7 @@ export default function BlobField() {
       drop.bend = (Math.random() * 2 - 1) * 0.15
       drop.colors = a.colors
       drop.phase = Math.random() * Math.PI * 2
+      drop.stretch = 1.3
       a.targetR = a.baseR * 0.82
     }
 
@@ -275,16 +288,24 @@ export default function BlobField() {
       amp: number,
       phase: number,
       n: number,
+      bulgeAng = 0,
+      bulgeAmt = 0,
     ) => {
       const rx = r * elong
       const ry = r
       const cos = Math.cos(orient)
       const sin = Math.sin(orient)
+      // Ángulo del bulge en el espacio local de la elipse (antes de rotar).
+      const bl = bulgeAng - orient
       const pts: { x: number; y: number }[] = []
       for (let i = 0; i < n; i++) {
         const ang = (i / n) * Math.PI * 2
-        const wob =
+        let wob =
           1 + amp * Math.sin(t * 0.6 + phase + i * 1.3) + amp * 0.4 * Math.cos(t * 0.5 + i * 2.1)
+        if (bulgeAmt > 0.01) {
+          // Protuberancia suave concentrada hacia el cursor (tensión líquida).
+          wob += bulgeAmt * Math.pow(0.5 + 0.5 * Math.cos(ang - bl), 3)
+        }
         const ex = Math.cos(ang) * rx * wob
         const ey = Math.sin(ang) * ry * wob
         pts.push({ x: x + ex * cos - ey * sin, y: y + ex * sin + ey * cos })
@@ -306,8 +327,10 @@ export default function BlobField() {
       const k = tintAmt * 0.6
       const c0 = mixRGB(lightenRGB(parseHex(colors[0]), 0.28), themeNow[0], k)
       const c1 = mixRGB(parseHex(colors[1]), themeNow[1], k)
-      const grad = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, rmax)
-      grad.addColorStop(0, rgbStr(c0))
+      // Núcleo casi blanco desplazado: brillo especular glossy de la referencia.
+      const grad = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.04, x, y, rmax)
+      grad.addColorStop(0, rgbStr(lightenRGB(c0, 0.55)))
+      grad.addColorStop(0.34, rgbStr(c0))
       grad.addColorStop(1, rgbStr(c1))
       ctx.fillStyle = grad
       ctx.fill()
@@ -323,8 +346,10 @@ export default function BlobField() {
       amp = 0.12,
       phase = 0,
       n = 8,
+      bulgeAng = 0,
+      bulgeAmt = 0,
     ) => {
-      pathBlob(x, y, r, elong, orient, amp, phase, n)
+      pathBlob(x, y, r, elong, orient, amp, phase, n, bulgeAng, bulgeAmt)
       fillBody(x, y, r, elong, colors)
     }
 
@@ -372,9 +397,18 @@ export default function BlobField() {
       }
 
       // Cuerpos sólidos (bajo el filtro goo): anclas, gotas y, si toca, ferro.
-      for (const a of anchors) blob(a.x, a.y, a.r, a.colors, a.elong, a.orient, a.amp, a.phase, POINTS)
+      // Las anclas se estiran en la dirección del movimiento según su velocidad
+      // (squash & stretch), como masa líquida con inercia.
+      const minWH = Math.min(w, h)
+      for (const a of anchors) {
+        const sp = Math.hypot(a.vx, a.vy)
+        const k = Math.min(sp / (minWH * 0.02), 1)
+        const moveAng = sp > 0.2 ? Math.atan2(a.vy, a.vx) : a.orient
+        const o = lerpAngle(a.orient, moveAng, k * 0.85)
+        blob(a.x, a.y, a.r, a.colors, a.elong + k * 0.7, o, a.amp, a.phase, POINTS, a.bulgeAng, a.bulge)
+      }
       for (const d of drops) {
-        if (d.active) blob(d.x, d.y, d.r, d.colors, 1.6, d.orient, 0.16, d.phase, 8)
+        if (d.active) blob(d.x, d.y, d.r, d.colors, d.stretch, d.orient, 0.16, d.phase, 8)
       }
       if (splashAmt > 0.02) drawFerro()
     }
@@ -415,6 +449,23 @@ export default function BlobField() {
         a.targetR += (a.baseR - a.targetR) * 0.03
         a.r += (a.targetR - a.r) * 0.12
         a.orient += a.orientSpeed
+
+        // Tensión hacia el cursor: si el puntero está cerca, la superficie se
+        // estira hacia él (atracción líquida) y relaja al alejarse.
+        if (pointer.active && !splash.active) {
+          const pdx = pointer.x - a.x
+          const pdy = pointer.y - a.y
+          const dist = Math.hypot(pdx, pdy)
+          const reach = a.r * a.elong * 2.4
+          const target = Math.max(0, 1 - dist / reach) * 0.5
+          a.bulge += (target - a.bulge) * 0.12
+          const ta = Math.atan2(pdy, pdx)
+          let da = ta - a.bulgeAng
+          da = Math.atan2(Math.sin(da), Math.cos(da))
+          a.bulgeAng += da * 0.25
+        } else {
+          a.bulge *= 0.88
+        }
 
         if (splash.active) {
           // Se reúnen y orbitan en un núcleo apretado sobre el nombre.
@@ -472,6 +523,7 @@ export default function BlobField() {
           d.y += d.vy
           d.r += (d.targetR - d.r) * 0.08
           d.orient = Math.atan2(ty - d.y, tx - d.x)
+          d.stretch = 1.3
           if (prevBirth > 0 && d.birth <= 0) {
             // Se desprende: fija el punto de partida del viaje.
             d.sx = d.x
@@ -491,6 +543,8 @@ export default function BlobField() {
           continue
         }
         const e = d.prog * d.prog * (3 - 2 * d.prog) // smoothstep
+        // Más estirada a media trayectoria (velocidad máxima), redonda al llegar.
+        d.stretch = 1.2 + Math.sin(d.prog * Math.PI) * 0.85
         const dirx = b.x - d.sx
         const diry = b.y - d.sy
         const L = Math.hypot(dirx, diry) || 1
@@ -531,6 +585,21 @@ export default function BlobField() {
       pointer.y = e.clientY
       pointer.active = true
     }
+    // Onda al hacer clic/tap: impulso radial que aparta las figuras y un leve
+    // encogimiento; los muelles las devuelven con rebote elástico.
+    const onDown = (e: PointerEvent) => {
+      if (splash.active) return
+      const minWH = Math.min(w, h)
+      for (const a of anchors) {
+        const dx = a.x - e.clientX
+        const dy = a.y - e.clientY
+        const L = Math.hypot(dx, dy) || 1
+        const f = Math.exp(-L / (minWH * 0.38)) * minWH * 0.035
+        a.vx += (dx / L) * f
+        a.vy += (dy / L) * f
+        a.targetR = Math.min(a.targetR, a.baseR * 0.93)
+      }
+    }
     const onCluster = (e: Event) => {
       const d = (e as CustomEvent).detail as {
         active: boolean
@@ -563,6 +632,7 @@ export default function BlobField() {
     raf = requestAnimationFrame(frame)
     window.addEventListener('resize', resize)
     window.addEventListener('pointermove', onMove, { passive: true })
+    window.addEventListener('pointerdown', onDown, { passive: true })
     window.addEventListener('blobcluster', onCluster as EventListener)
     window.addEventListener('blobview', onView as EventListener)
     window.addEventListener('blobproject', onProject as EventListener)
@@ -571,6 +641,7 @@ export default function BlobField() {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerdown', onDown)
       window.removeEventListener('blobcluster', onCluster as EventListener)
       window.removeEventListener('blobview', onView as EventListener)
       window.removeEventListener('blobproject', onProject as EventListener)
@@ -612,6 +683,13 @@ export default function BlobField() {
 
 function midpoint(a: { x: number; y: number }, b: { x: number; y: number }) {
   return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+}
+
+// Interpola ángulos por el camino corto (evita el salto al cruzar ±π).
+function lerpAngle(a: number, b: number, k: number) {
+  let d = b - a
+  d = Math.atan2(Math.sin(d), Math.cos(d))
+  return a + d * k
 }
 
 function hexA(hex: string, a: number) {
