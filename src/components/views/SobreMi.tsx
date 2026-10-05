@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import { FileText } from 'lucide-react'
-import { stack, cvUrl, imgUrl } from '@/data/portfolio'
+import { stack, cvUrl, imgUrl, experience, profile } from '@/data/portfolio'
 
 const EASE = [0.16, 1, 0.3, 1] as const
 const core = stack.flatMap((g) => g.items).filter((i) => i.core).map((i) => i.name)
@@ -16,8 +16,9 @@ export default function SobreMi() {
   })
 
   return (
-    <div className="flex h-full flex-col justify-center overflow-y-auto px-5 pb-10 pt-24 md:px-8">
-      <div className="mx-auto grid w-full max-w-shell items-center gap-10 md:grid-cols-12">
+    <div className="flex h-full flex-col overflow-y-auto px-5 pb-10 pt-24 md:px-8">
+      {/* my-auto centra sin recortar el contenido cuando no cabe (justify-center lo cortaría). */}
+      <div className="mx-auto my-auto grid w-full max-w-shell items-center gap-10 md:grid-cols-12">
         {/* Media */}
         <motion.div {...rise(0.05)} className="hidden md:col-span-5 md:block">
           <div className="card aspect-[4/5] max-h-[70vh]">
@@ -36,11 +37,7 @@ export default function SobreMi() {
           </motion.h2>
 
           <motion.div {...rise(0.2)} className="mt-6 space-y-5 text-base font-light leading-relaxed text-ink/90 md:text-lg">
-            <p>
-              Soy ingeniero de software full-stack y estudiante en la UPC.
-              Construyo plataformas, interfaces y APIs, y me obsesiona que cada
-              pieza se sienta rápida, clara y bien resuelta.
-            </p>
+            <p>{profile.bio}</p>
             <p>
               Fuera del editor, la música pop es mi motor: de lo que escucho
               nacen los universos visuales que luego intento materializar con
@@ -58,7 +55,9 @@ export default function SobreMi() {
               <FileText size={16} />
               Ver mi CV
             </a>
-            <span className="text-sm text-muted">Egreso previsto: Diciembre 2026 · UPC</span>
+            <span className="text-sm text-muted">
+              Egreso previsto: {profile.graduation} · {profile.university} · {profile.availability}
+            </span>
           </motion.div>
 
           <motion.div {...rise(0.4)} className="mt-10 border-t border-line pt-5">
@@ -66,6 +65,21 @@ export default function SobreMi() {
             <ul className="flex flex-wrap gap-2">
               {core.map((name) => (
                 <li key={name} className="rounded-full bg-ink px-3 py-1 text-xs text-paper">{name}</li>
+              ))}
+            </ul>
+          </motion.div>
+
+          <motion.div {...rise(0.5)} className="mt-8 border-t border-line pt-5">
+            <p className="mb-3 text-sm text-muted">Experiencia</p>
+            <ul className="grid gap-2 text-sm">
+              {experience.map((e) => (
+                <li key={e.company + e.period} className="flex flex-wrap justify-between gap-x-4">
+                  <span>
+                    <span className="font-medium">{e.role}</span>
+                    <span className="text-muted"> · {e.company}</span>
+                  </span>
+                  <span className="tabular-nums text-muted">{e.period}</span>
+                </li>
               ))}
             </ul>
           </motion.div>

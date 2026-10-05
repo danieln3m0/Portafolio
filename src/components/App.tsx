@@ -2,13 +2,15 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import BlobField from './BlobField'
+import Scene3D from './Scene3D'
 import Nav from './Nav'
 import Inicio from './views/Inicio'
 import Proyectos from './views/Proyectos'
 import ProyectoDetalle from './views/ProyectoDetalle'
 import SobreMi from './views/SobreMi'
+import TuForma from './views/TuForma'
 import Contacto from './views/Contacto'
+import Reclutador from './views/Reclutador'
 import { blobView, clusterOff, type View } from '@/lib/cluster'
 
 const EASE = [0.16, 1, 0.3, 1] as const
@@ -73,21 +75,25 @@ export default function App() {
       case 'inicio':
         return <Inicio onNavigate={navigate} />
       case 'proyectos':
-        return <Proyectos onOpen={openProject} />
+        return <Proyectos initial={project} onOpen={openProject} />
       case 'detalle':
         return <ProyectoDetalle index={project} onBack={() => navigate('proyectos')} onOpen={openProject} />
       case 'sobre-mi':
         return <SobreMi />
+      case 'tu-forma':
+        return <TuForma />
       case 'contacto':
         return <Contacto />
+      case 'reclutador':
+        return <Reclutador />
     }
   }
 
   return (
     <div className="relative h-[100dvh] overflow-hidden">
-      {/* Resplandor menta + blobs iridiscentes (pieza central) */}
+      {/* Resplandor menta + escena 3D de metaballs iridiscentes (pieza central) */}
       <div className="glow-mint" aria-hidden="true" />
-      <BlobField />
+      <Scene3D />
 
       <Nav current={view} onNavigate={navigate} />
 

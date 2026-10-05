@@ -2,14 +2,15 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { ArrowUpRight, Moon, Sun, X } from 'lucide-react'
+import { ArrowUpRight, BriefcaseBusiness, Moon, Sun, X } from 'lucide-react'
 import type { View } from '@/lib/cluster'
 
 const items: { n: string; view: View; label: string }[] = [
   { n: '01', view: 'inicio', label: 'Inicio' },
   { n: '02', view: 'proyectos', label: 'Proyectos' },
   { n: '03', view: 'sobre-mi', label: 'Sobre mí' },
-  { n: '04', view: 'contacto', label: 'Contacto' },
+  { n: '04', view: 'tu-forma', label: 'Tu forma' },
+  { n: '05', view: 'contacto', label: 'Contacto' },
 ]
 
 const social = [
@@ -36,6 +37,7 @@ export default function Nav({ current, onNavigate }: { current: View; onNavigate
   const closeRef = useRef<HTMLButtonElement>(null)
   const activeView: View = current === 'detalle' ? 'proyectos' : current
   const activeItem = items.find((it) => it.view === activeView)
+  const recruiter = current === 'reclutador'
 
   useEffect(() => {
     if (!open) return
@@ -80,18 +82,30 @@ export default function Nav({ current, onNavigate }: { current: View; onNavigate
           <div className="flex items-center gap-1">
             {/* Dónde estoy: vista actual siempre visible sin abrir el menú. */}
             <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={activeView}
-                initial={reduce ? false : { opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={reduce ? undefined : { opacity: 0, y: -6 }}
-                transition={{ duration: 0.3, ease: EASE }}
-                className="mr-3 hidden text-[0.68rem] uppercase tracking-[0.22em] text-muted sm:block"
-                aria-hidden="true"
-              >
-                {activeItem?.n} · {activeItem?.label}
-              </motion.span>
+              {activeItem && (
+                <motion.span
+                  key={activeView}
+                  initial={reduce ? false : { opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={reduce ? undefined : { opacity: 0, y: -6 }}
+                  transition={{ duration: 0.3, ease: EASE }}
+                  className="mr-3 hidden text-[0.68rem] uppercase tracking-[0.22em] text-muted md:block"
+                  aria-hidden="true"
+                >
+                  {activeItem.n} · {activeItem.label}
+                </motion.span>
+              )}
             </AnimatePresence>
+            {/* Modo reclutador: lo esencial en una pantalla; se sale volviendo a pulsar. */}
+            <button
+              onClick={() => go(recruiter ? 'inicio' : 'reclutador')}
+              aria-pressed={recruiter}
+              aria-label="Modo reclutador"
+              className="mr-1 inline-flex h-10 items-center gap-2 rounded-full border border-line px-3 text-xs text-ink transition-[background-color,color,border-color,transform] duration-300 hover:border-ink active:scale-95 aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-paper"
+            >
+              <BriefcaseBusiness size={15} aria-hidden="true" />
+              <span className="hidden sm:inline">Modo reclutador</span>
+            </button>
             <button
               onClick={toggleTheme}
               aria-label={dark ? 'Activar modo claro' : 'Activar modo oscuro'}

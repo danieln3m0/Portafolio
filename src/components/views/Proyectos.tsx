@@ -1,50 +1,62 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowUpRight } from 'lucide-react'
-import { projects, imgUrl } from '@/data/portfolio'
+import { useRef, useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { ArrowUpRight, Trophy } from 'lucide-react'
+import { projects } from '@/data/portfolio'
 import { blobProject } from '@/lib/cluster'
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
-export default function Proyectos({ onOpen }: { onOpen: (i: number) => void }) {
-  const [active, setActive] = useState(0)
+export default function Proyectos({ initial = 0, onOpen }: { initial?: number; onOpen: (i: number) => void }) {
+  const [active, setActive] = useState(initial)
+  const reduce = useReducedMotion()
   const p = projects[active]
+  // En pantallas táctiles el primer toque materializa el modelo y el segundo abre el proyecto.
+  const touchPreview = useRef(false)
 
-  // Precarga las vistas previas: el cambio entre filas no parpadea.
-  useEffect(() => {
-    for (const proj of projects) {
-      const im = new Image()
-      im.src = imgUrl(proj.seed, 1100, 825)
-    }
-  }, [])
-
-  // Resalta un proyecto: actualiza la vista previa y tiñe el cúmulo del fondo.
+  // Resalta un proyecto: el líquido del fondo se materializa en su modelo 3D.
   const highlight = (i: number) => {
+    if (i === active) return
     setActive(i)
     blobProject(i)
   }
 
   return (
-    <div className="flex h-full flex-col justify-center overflow-y-auto px-5 pb-10 pt-24 md:px-8">
-      <div className="mx-auto w-full max-w-shell">
-        <div className="flex items-end justify-between gap-6 border-b border-line pb-5">
-          <h2 className="display text-[clamp(2rem,5.5vw,4rem)] uppercase">Proyectos</h2>
-          <span className="text-lg text-muted">{projects.length}</span>
-        </div>
+    <div className="flex h-full flex-col overflow-y-auto px-5 pb-10 pt-24 md:px-8">
+      {/* my-auto centra sin recortar el contenido cuando no cabe (justify-center lo cortaría). */}
+      <div className="mx-auto my-auto w-full max-w-shell">
+        {/* En móvil el modelo 3D se materializa arriba: se le deja sitio. */}
+        <div className="h-[30vh] md:hidden" aria-hidden="true" />
 
-        <div className="mt-8 grid gap-10 md:grid-cols-12">
-          {/* Lista */}
-          <div className="md:col-span-7">
-            <ul>
+        <div className="grid gap-10 md:grid-cols-12">
+          <div className="flex flex-col md:col-span-6">
+            <div className="flex items-end justify-between gap-6 border-b border-line pb-5">
+              <h2 className="display text-[clamp(2rem,5.5vw,4rem)] uppercase">Proyectos</h2>
+              <span className="text-lg text-muted">{projects.length}</span>
+            </div>
+
+            <ul className="order-2 md:order-none">
               {projects.map((proj, i) => (
                 <li key={proj.title}>
                   <button
                     onMouseEnter={() => highlight(i)}
                     onFocus={() => highlight(i)}
-                    onClick={() => onOpen(i)}
-                    className={`group grid w-full grid-cols-12 items-baseline gap-3 border-t border-line py-5 text-left transition-opacity duration-300 ${
+                    onPointerDown={(e) => {
+                      touchPreview.current = e.pointerType === 'touch' && i !== active
+                    }}
+                    onPointerCancel={() => (touchPreview.current = false)}
+                    onKeyDown={() => (touchPreview.current = false)}
+                    onClick={() => {
+                      if (touchPreview.current) {
+                        touchPreview.current = false
+                        highlight(i)
+                        return
+                      }
+                      onOpen(i)
+                    }}
+                    aria-current={i === active ? 'true' : undefined}
+                    className={`group grid w-full grid-cols-12 items-baseline gap-3 border-b border-line py-5 text-left transition-opacity duration-300 ${
                       i === active ? 'opacity-100' : 'opacity-60 hover:opacity-100'
                     }`}
                   >
@@ -67,45 +79,40 @@ export default function Proyectos({ onOpen }: { onOpen: (i: number) => void }) {
                     </span>
                     <span className="col-span-3 hidden text-right text-sm text-muted sm:block">{proj.category}</span>
                   </button>
-
-                  {/* Media en línea (solo móvil) */}
-                  <button onClick={() => onOpen(i)} className="block w-full pb-8 text-left md:hidden">
-                    <div className="card aspect-[16/10]">
-                      <img src={imgUrl(proj.seed, 1000, 625)} alt={`Vista del proyecto ${proj.title}`} loading="lazy" />
-                    </div>
-                    <p className="mt-3 text-sm text-muted">{proj.category} · {proj.year}</p>
-                  </button>
                 </li>
               ))}
             </ul>
-          </div>
 
-          {/* Vista previa (solo escritorio) */}
-          <div className="hidden md:col-span-5 md:block">
-            <AnimatePresence mode="wait">
-              <motion.button
+            {/* Qué forma toma el fondo y de qué va el proyecto activo (en móvil, antes de la lista: junto al modelo). */}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
                 key={active}
-                onClick={() => onOpen(active)}
-                initial={{ opacity: 0, y: 12, scale: 0.985, filter: 'blur(6px)' }}
-                animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, transition: { duration: 0.18 } }}
-                transition={{ duration: 0.45, ease: EASE }}
-                className="group block w-full text-left"
+                initial={reduce ? false : { opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduce ? undefined : { opacity: 0, transition: { duration: 0.15 } }}
+                transition={{ duration: 0.4, ease: EASE }}
+                className="order-1 mb-2 mt-6 grid gap-3 md:order-none md:mb-0"
               >
-                <div className="card aspect-[4/3]">
-                  <img src={imgUrl(p.seed, 1100, 825)} alt={`Vista del proyecto ${p.title}`} />
-                </div>
-                <div className="mt-4 flex items-center justify-between text-sm text-muted">
-                  <span>{p.category}</span>
-                  <span>{p.year}</span>
-                </div>
-                <span className="cta link-underline mt-3 text-sm">
+                <span className="justify-self-start rounded-full border border-line bg-paper/70 px-3 py-1 text-[0.7rem] font-medium uppercase tracking-[0.18em] text-muted">
+                  Forma · {p.shape}
+                </span>
+                {p.award && (
+                  <span className="inline-flex items-center gap-2 text-sm">
+                    <Trophy size={14} aria-hidden="true" />
+                    {p.award}
+                  </span>
+                )}
+                <p className="max-w-xl font-light leading-relaxed text-ink/90">{p.challenge}</p>
+                <button onClick={() => onOpen(active)} className="cta link-underline justify-self-start text-sm">
                   <ArrowUpRight size={16} />
                   Ver proyecto
-                </span>
-              </motion.button>
+                </button>
+              </motion.div>
             </AnimatePresence>
           </div>
+
+          {/* Columna derecha vacía: ahí se materializa el modelo 3D del fondo. */}
+          <div className="hidden md:col-span-6 md:block" aria-hidden="true" />
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Trophy } from 'lucide-react'
 import Reveal from '@/components/Reveal'
 import { projects, imgUrl } from '@/data/portfolio'
 
@@ -29,6 +29,12 @@ export default function ProyectoDetalle({
             {p.category} · {p.year}
           </p>
           <h1 className="display mt-3 text-[clamp(2.2rem,6vw,4.5rem)] uppercase">{p.title}</h1>
+          {p.award && (
+            <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-line px-3 py-1.5 text-sm">
+              <Trophy size={15} aria-hidden="true" />
+              {p.award}
+            </p>
+          )}
           <p className="mt-5 max-w-2xl text-lg font-light leading-relaxed text-ink/90">{p.challenge}</p>
         </Reveal>
 
