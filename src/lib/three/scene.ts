@@ -3,7 +3,7 @@ import { MarchingCubes } from 'three/examples/jsm/objects/MarchingCubes.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import type { ProjectModel } from '@/data/portfolio'
 import type { View } from '@/lib/cluster'
-import { buildSupershapeData, type SupershapeParams } from '@/lib/supershape'
+import { buildSupershapeData, type Face, type SupershapeParams } from '@/lib/supershape'
 import { buildProjectModel, makeMaterial, PALETTE, PROJECT_THEMES, type ModelDef } from './models'
 
 /**
@@ -46,7 +46,8 @@ const SUB = 12
 const SPIKES = 12
 const MOBILE = 768 // breakpoint md de Tailwind
 
-type Model = { holder: THREE.Group; rot: [number, number]; update: (t: number) => void; vis: number; target: number }
+// still: el holder no se balancea ni sigue al cursor (el avatar mueve sus propios ojos).
+type Model = { holder: THREE.Group; rot: [number, number]; update: (t: number) => void; vis: number; target: number; still?: boolean }
 
 const smooth = (x: number) => x * x * (3 - 2 * x)
 const easeOutBack = (x: number) => 1 + 2.5 * (x - 1) ** 3 + 1.5 * (x - 1) ** 2
@@ -178,20 +179,142 @@ function buildScene(
   }
   const projectModels = kinds.map((k) => makeModel(buildProjectModel(k)))
 
+  // Avatar: cuerpo (supershape) + carita. Mira al frente y se balancea.
   const superMat = makeMaterial(0xffffff, { vertexColors: true, roughness: 0.22, side: THREE.DoubleSide, iridescence: 1 })
   const superMesh = new THREE.Mesh(new THREE.BufferGeometry(), superMat)
+  const faceGroup = new THREE.Group()
+  const avatar = new THREE.Group()
+  avatar.add(superMesh, faceGroup)
   const superHolder = new THREE.Group()
-  superHolder.add(superMesh)
+  superHolder.add(avatar)
   superHolder.visible = false
   scene.add(superHolder)
+  const eyeMat = makeMaterial('#262739', { roughness: 0.12, metalness: 0.1, iridescence: 0.3 })
+  const sparkleMat = new THREE.MeshBasicMaterial({ color: 0xffffff })
+  const mouthMat = makeMaterial('#3a2a3a', { roughness: 0.3, iridescence: 0 })
+  const blushMat = makeMaterial('#f7a9bf', { roughness: 0.5, iridescence: 0.2 })
+  const leafMat = makeMaterial('#8fdcb4', { roughness: 0.35 })
+  const stemMat = makeMaterial('#e2e1dc', { metalness: 0.4, roughness: 0.3 })
+  const eyes: { g: THREE.Group; base: THREE.Vector3 }[] = []
   const superModel: Model = {
     holder: superHolder,
-    rot: [0.45, -0.6],
-    update: (t) => (superMesh.rotation.y = t * 0.25),
+    rot: [0.06, 0],
+    still: true,
+    update: (t) => {
+      avatar.rotation.y = Math.sin(t * 0.6) * 0.22
+      avatar.position.y = Math.abs(Math.sin(t * 1.6)) * 0.04
+      // Parpadeo suave cada ~3.7 s y mirada que sigue al cursor.
+      const k = t % 3.7
+      const blink = !reduce && k < 0.18 ? 1 - Math.sin((k / 0.18) * Math.PI) * 0.88 : 1
+      for (const e of eyes) {
+        e.g.scale.y = blink
+        e.g.position.set(e.base.x + pointer.sx * 0.035, e.base.y + pointer.sy * 0.03, e.base.z)
+      }
+    },
     vis: 0,
     target: 0,
   }
   const allModels = [...projectModels, superModel]
+
+  // Busca la superficie frontal del cuerpo (rayo desde +z) o la cima (rayo desde +y).
+  const rc = new THREE.Raycaster()
+  function surface(geo: THREE.BufferGeometry, from: THREE.Vector3, dir: THREE.Vector3) {
+    const probe = new THREE.Mesh(geo, superMat)
+    probe.updateMatrixWorld(true)
+    rc.set(from, dir)
+    const hit = rc.intersectObject(probe, false)[0]
+    if (!hit) return null
+    const n = hit.face ? hit.face.normal.clone() : dir.clone().negate()
+    // Con DoubleSide la normal puede apuntar hacia dentro: se orienta hacia el rayo.
+    if (n.dot(dir) > 0) n.negate()
+    return { p: hit.point, n }
+  }
+  const front = (geo: THREE.BufferGeometry, x: number, y: number) => surface(geo, new THREE.Vector3(x, y, 5), new THREE.Vector3(0, 0, -1))
+
+  function buildFace(geo: THREE.BufferGeometry, face: Face) {
+    faceGroup.traverse((o) => { if (o instanceof THREE.Mesh) o.geometry.dispose() })
+    faceGroup.clear()
+    eyes.length = 0
+    const s = face.eyeSize
+    const place = (mesh: THREE.Object3D, hit: { p: THREE.Vector3; n: THREE.Vector3 }, lift: number) => {
+      mesh.position.copy(hit.p).addScaledVector(hit.n, lift)
+      faceGroup.add(mesh)
+      return mesh
+    }
+    // Ojos: puntos oscuros y brillantes con dos destellos (estilo kawaii).
+    for (const side of [-1, 1]) {
+      let hit = front(geo, side * face.eyeGap, face.eyeY)
+      if (!hit) hit = front(geo, side * face.eyeGap * 0.6, face.eyeY * 0.5)
+      if (!hit) continue
+      const g = new THREE.Group()
+      const ball = new THREE.Mesh(new THREE.SphereGeometry(s, 24, 18), eyeMat)
+      ball.scale.set(1, 1.18, 0.55)
+      const big = new THREE.Mesh(new THREE.SphereGeometry(s * 0.3, 12, 10), sparkleMat)
+      big.position.set(-s * 0.32, s * 0.38, s * 0.5)
+      const small = new THREE.Mesh(new THREE.SphereGeometry(s * 0.13, 10, 8), sparkleMat)
+      small.position.set(s * 0.3, -s * 0.28, s * 0.5)
+      g.add(ball, big, small)
+      place(g, hit, s * 0.25)
+      eyes.push({ g, base: g.position.clone() })
+    }
+    // Boca: sonrisa, "o" o boquita de gato.
+    const mouthHit = front(geo, 0, face.eyeY - s * 2.1)
+    if (mouthHit) {
+      if (face.mouth === 'smile') {
+        const m = new THREE.Mesh(new THREE.TorusGeometry(s * 0.75, s * 0.16, 8, 24, Math.PI), mouthMat)
+        m.rotation.z = Math.PI
+        place(m, mouthHit, s * 0.1)
+      } else if (face.mouth === 'open') {
+        const m = new THREE.Mesh(new THREE.SphereGeometry(s * 0.42, 16, 12), mouthMat)
+        m.scale.set(1, 0.85, 0.4)
+        place(m, mouthHit, s * 0.05)
+      } else {
+        for (const side of [-1, 1]) {
+          const m = new THREE.Mesh(new THREE.TorusGeometry(s * 0.38, s * 0.13, 8, 20, Math.PI), mouthMat)
+          m.rotation.z = Math.PI
+          const hit = front(geo, side * s * 0.38, face.eyeY - s * 2.1)
+          if (hit) place(m, hit, s * 0.1)
+        }
+      }
+    }
+    // Mejillas sonrojadas.
+    if (face.blush) {
+      for (const side of [-1, 1]) {
+        const hit = front(geo, side * (face.eyeGap + s * 0.7), face.eyeY - s * 1.5)
+        if (!hit) continue
+        const m = new THREE.Mesh(new THREE.SphereGeometry(s * 0.55, 16, 12), blushMat)
+        m.scale.set(1, 0.6, 0.25)
+        place(m, hit, s * 0.05)
+      }
+    }
+    // Adorno en la cima: antena o brote.
+    // El rayo se desplaza un poco del eje: justo en el polo convergen cientos de triángulos
+    // y la intersección puede no detectar ninguno.
+    const top = surface(geo, new THREE.Vector3(0.001, 5, 0.0013), new THREE.Vector3(0, -1, 0))
+    if (top && face.topper !== 'none') {
+      const g = new THREE.Group()
+      if (face.topper === 'antenna') {
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.3, 8), stemMat)
+        stem.position.y = 0.15
+        const tip = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 12), blushMat)
+        tip.position.y = 0.32
+        g.add(stem, tip)
+      } else {
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.18, 8), leafMat)
+        stem.position.y = 0.09
+        for (const side of [-1, 1]) {
+          const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.09, 16, 10), leafMat)
+          leaf.scale.set(1.4, 0.45, 0.8)
+          leaf.position.set(side * 0.1, 0.2, 0)
+          leaf.rotation.z = side * 0.5
+          g.add(leaf)
+        }
+        g.add(stem)
+      }
+      g.position.copy(top.p)
+      faceGroup.add(g)
+    }
+  }
 
   let superKey = ''
   function buildSuper(P: SupershapeParams) {
@@ -216,8 +339,10 @@ function buildScene(
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
     geo.setIndex(new THREE.BufferAttribute(data.indices, 1))
     geo.computeVertexNormals()
+    geo.computeBoundingSphere()
     superMesh.geometry.dispose()
     superMesh.geometry = geo
+    buildFace(geo, P.face)
   }
 
   // ---------- Estado ----------
@@ -408,8 +533,8 @@ function buildScene(
       m.holder.scale.setScalar((layout.size / 2) * Math.max(0.001, easeOutBack(Math.min(1, m.vis))))
       m.holder.position.copy(layout.c)
       m.holder.position.y += Math.sin(t * 0.9) * layout.size * 0.015
-      m.holder.rotation.x = m.rot[0] - pointer.sy * 0.25
-      m.holder.rotation.y = m.rot[1] + Math.sin(t * 0.45) * 0.22 + pointer.sx * 0.45
+      m.holder.rotation.x = m.still ? m.rot[0] : m.rot[0] - pointer.sy * 0.25
+      m.holder.rotation.y = m.still ? m.rot[1] : m.rot[1] + Math.sin(t * 0.45) * 0.22 + pointer.sx * 0.45
       m.update(t)
     }
     renderer.render(scene, camera)
@@ -496,12 +621,26 @@ function buildScene(
       cam.position.set(0, 0, 6.6)
       card = { r, scene: s, cam, env: e }
     }
-    const m = new THREE.Mesh(superMesh.geometry, superMat)
-    m.rotation.set(0.45, -0.6, 0)
-    card.scene.add(m)
-    card.r.render(card.scene, card.cam)
-    card.scene.remove(m)
-    return card.r.domElement.toDataURL('image/png')
+    // El avatar se presta a la escena de la tarjeta en pose neutra (ojos abiertos, de frente)
+    // y vuelve a su sitio; el siguiente cuadro recupera balanceo y mirada.
+    const parent = avatar.parent
+    const rot = avatar.rotation.clone()
+    const pos = avatar.position.clone()
+    avatar.rotation.set(0.06, -0.18, 0)
+    avatar.position.set(0, 0, 0)
+    const eyePose = eyes.map((e) => ({ p: e.g.position.clone(), s: e.g.scale.y }))
+    for (const e of eyes) { e.g.scale.y = 1; e.g.position.copy(e.base) }
+    card.scene.add(avatar)
+    try {
+      card.r.render(card.scene, card.cam)
+      return card.r.domElement.toDataURL('image/png')
+    } finally {
+      parent?.add(avatar)
+      avatar.rotation.copy(rot)
+      avatar.position.copy(pos)
+      eyes.forEach((e, i) => { e.g.position.copy(eyePose[i].p); e.g.scale.y = eyePose[i].s })
+      dirty = 3
+    }
   }
 
   return {
@@ -542,6 +681,8 @@ function buildScene(
           mats.forEach((mt: THREE.Material) => mt.dispose())
         }
       })
+      // Materiales de la carita: pueden no estar en uso (sin mejillas o sin adorno).
+      ;[eyeMat, sparkleMat, mouthMat, blushMat, leafMat, stemMat].forEach((mt) => mt.dispose())
       env.dispose()
       renderer.dispose()
       if (card) {

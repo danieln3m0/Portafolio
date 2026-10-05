@@ -19,7 +19,7 @@ const EASE = [0.16, 1, 0.3, 1] as const
 const CARD_W = 1080
 const CARD_H = 1350
 
-// Silueta 2D de respaldo para la tarjeta si la escena 3D no está disponible.
+// Avatar 2D de respaldo para la tarjeta si la escena 3D no está disponible.
 function fallbackShape(g: CanvasRenderingContext2D, P: SupershapeParams, cx: number, cy: number, R: number) {
   const pts: [number, number][] = []
   let max = 0
@@ -32,7 +32,7 @@ function fallbackShape(g: CanvasRenderingContext2D, P: SupershapeParams, cx: num
   g.beginPath()
   pts.forEach(([phi, r], i) => {
     const x = cx + Math.cos(phi) * (r / max) * R
-    const y = cy + Math.sin(phi) * (r / max) * R
+    const y = cy + Math.sin(phi) * (r / max) * R * P.stretch
     if (i) g.lineTo(x, y)
     else g.moveTo(x, y)
   })
@@ -43,6 +43,44 @@ function fallbackShape(g: CanvasRenderingContext2D, P: SupershapeParams, cx: num
   fill.addColorStop(1, '#9fb6f6')
   g.fillStyle = fill
   g.fill()
+  // Carita: ojos con destellos, boca y mejillas (proporciones aproximadas a las del avatar 3D).
+  const { eyeSize, eyeGap, eyeY, mouth, blush } = P.face
+  const s = eyeSize * R
+  const ey = cy - eyeY * R
+  for (const side of [-1, 1]) {
+    const ex = cx + side * eyeGap * R
+    g.fillStyle = '#262739'
+    g.beginPath()
+    g.ellipse(ex, ey, s, s * 1.18, 0, 0, Math.PI * 2)
+    g.fill()
+    g.fillStyle = '#ffffff'
+    g.beginPath()
+    g.arc(ex - s * 0.32, ey - s * 0.38, s * 0.3, 0, Math.PI * 2)
+    g.arc(ex + s * 0.3, ey + s * 0.28, s * 0.13, 0, Math.PI * 2)
+    g.fill()
+    if (blush) {
+      g.fillStyle = 'rgba(247,169,191,0.85)'
+      g.beginPath()
+      g.ellipse(cx + side * (eyeGap * R + s * 0.7), ey + s * 1.5, s * 0.55, s * 0.33, 0, 0, Math.PI * 2)
+      g.fill()
+    }
+  }
+  const my = ey + s * 2.1
+  g.strokeStyle = '#3a2a3a'
+  g.fillStyle = '#3a2a3a'
+  g.lineWidth = s * 0.32
+  g.lineCap = 'round'
+  g.beginPath()
+  if (mouth === 'smile') g.arc(cx, my - s * 0.3, s * 0.75, 0.15 * Math.PI, 0.85 * Math.PI)
+  else if (mouth === 'open') g.ellipse(cx, my, s * 0.42, s * 0.36, 0, 0, Math.PI * 2)
+  else {
+    g.arc(cx - s * 0.38, my - s * 0.2, s * 0.38, 0.1 * Math.PI, 0.9 * Math.PI)
+    g.stroke()
+    g.beginPath()
+    g.arc(cx + s * 0.38, my - s * 0.2, s * 0.38, 0.1 * Math.PI, 0.9 * Math.PI)
+  }
+  if (mouth === 'open') g.fill()
+  else g.stroke()
 }
 
 // La tarjeta es una imagen para exportar: usa la paleta clara fija del portafolio.
@@ -66,7 +104,7 @@ function paintCard(canvas: HTMLCanvasElement, name: string, P: SupershapeParams,
   g.fillText('PORTAFOLIO · FRANCIS DANIEL', 80, 110)
   g.fillStyle = '#3a3c58'
   g.font = `800 64px ${family}`
-  g.fillText('LA FORMA DE', 80, 1110)
+  g.fillText('EL AVATAR DE', 80, 1110)
   const label = name.toUpperCase()
   let size = 116
   g.font = `800 ${size}px ${family}`
@@ -83,7 +121,7 @@ function paintCard(canvas: HTMLCanvasElement, name: string, P: SupershapeParams,
 }
 
 const fileName = (name: string) =>
-  `forma-${name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'visitante'}.png`
+  `avatar-${name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'visitante'}.png`
 
 export default function TuForma() {
   const reduce = useReducedMotion()
@@ -163,7 +201,7 @@ export default function TuForma() {
       return
     }
     try {
-      await navigator.share({ files: [file], title: `La forma de ${name}` })
+      await navigator.share({ files: [file], title: `El avatar de ${name}` })
     } catch {
       // El visitante cerró el diálogo de compartir.
     }
@@ -180,8 +218,8 @@ export default function TuForma() {
             Tu forma
           </motion.h2>
           <motion.p {...rise(0.18)} className="mt-5 max-w-md text-base font-light leading-relaxed text-ink/90">
-            Tu nombre siembra dos superfórmulas de Gielis que se combinan en una figura 3D. El mismo nombre
-            siempre da la misma forma.
+            Tu nombre da vida a un pequeño avatar 3D: su cuerpo, sus ojos y su expresión salen de
+            superfórmulas sembradas con tu nombre. El mismo nombre siempre da el mismo avatar.
           </motion.p>
 
           <motion.form
@@ -222,7 +260,7 @@ export default function TuForma() {
               width={CARD_W}
               height={CARD_H}
               role="img"
-              aria-label={`Tarjeta con la forma de ${name}`}
+              aria-label={`Tarjeta con el avatar de ${name}`}
               className="aspect-[4/5] w-[200px] max-w-full rounded-2xl shadow-[0_24px_50px_-26px_rgb(var(--ink)/0.45)]"
             />
             <div className="grid gap-3">

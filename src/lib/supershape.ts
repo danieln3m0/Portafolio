@@ -1,9 +1,17 @@
-// Supershape 3D de "Tu forma": dos superfórmulas de Gielis (una por ángulo)
-// sembradas por el nombre del visitante. Mismo nombre → misma forma.
+// Avatar de "Tu forma": un cuerpo hecho con dos superfórmulas de Gielis (una
+// por ángulo) y una carita (ojos, boca, mejillas y un adorno), todo sembrado
+// por el nombre del visitante. Mismo nombre → mismo avatar.
 // Funciones puras: no dependen de Three.js ni del DOM.
 
 export type Superformula = { m: number; n1: number; n2: number; n3: number }
-export type SupershapeParams = { a: Superformula; b: Superformula; pal: number; theme: number }
+export const MOUTHS = ['smile', 'open', 'cat'] as const
+export const TOPPERS = ['none', 'antenna', 'sprout'] as const
+export type Mouth = (typeof MOUTHS)[number]
+export type Topper = (typeof TOPPERS)[number]
+// Medidas relativas al cuerpo normalizado (dimensión mayor = 2).
+export type Face = { eyeSize: number; eyeGap: number; eyeY: number; mouth: Mouth; blush: boolean; topper: Topper }
+// stretch: estiramiento vertical del cuerpo (más bajito y ancho < 1 < más alto).
+export type SupershapeParams = { a: Superformula; b: Superformula; pal: number; theme: number; face: Face; stretch: number }
 
 export const DEFAULT_NAME = 'Visitante'
 export const MAX_NAME = 18
@@ -35,13 +43,24 @@ export function mulberry32(seed: number): () => number {
 
 export function paramsFor(name: string, palettes = 5, themes = 4): SupershapeParams {
   const r = mulberry32(seedFrom(name))
-  const pick = (a: number[]) => a[Math.floor(r() * a.length)]
+  const pick = <T,>(a: readonly T[]) => a[Math.floor(r() * a.length)]
   const f = (lo: number, hi: number) => +(lo + r() * (hi - lo)).toFixed(2)
+  // Rangos intermedios: cuerpos blandos con algo de lóbulos y bultos, sin llegar a púas
+  // (radio mínimo/máximo ≈ 0.89 de mediana; 1 sería una esfera perfecta).
   return {
-    a: { m: pick([3, 4, 5, 6, 7, 8, 9, 10]), n1: f(0.5, 1.6), n2: f(0.4, 1.9), n3: f(0.4, 1.9) },
-    b: { m: pick([2, 3, 4, 5, 6]), n1: f(0.6, 1.8), n2: f(0.4, 1.9), n3: f(0.4, 1.9) },
+    a: { m: pick([2, 3, 4, 5, 6, 7]), n1: f(0.9, 2.6), n2: f(0.9, 2), n3: f(0.9, 2) },
+    b: { m: pick([2, 3, 4, 5]), n1: f(1.2, 3.5), n2: f(1, 2), n3: f(1, 2) },
     pal: Math.floor(r() * palettes),
     theme: Math.floor(r() * themes),
+    face: {
+      eyeSize: f(0.12, 0.18),
+      eyeGap: f(0.26, 0.4),
+      eyeY: f(0.02, 0.22),
+      mouth: pick(MOUTHS),
+      blush: r() < 0.7,
+      topper: pick(TOPPERS),
+    },
+    stretch: f(0.85, 1.2),
   }
 }
 
@@ -72,7 +91,7 @@ export function buildSupershapeData(P: SupershapeParams, U = 200, V = 100): Supe
       const th = -Math.PI + (2 * Math.PI * i) / U
       const r1 = superformula(P.a, th)
       positions[k * 3] = r1 * Math.cos(th) * r2 * Math.cos(phi)
-      positions[k * 3 + 1] = r2 * Math.sin(phi)
+      positions[k * 3 + 1] = r2 * Math.sin(phi) * P.stretch
       positions[k * 3 + 2] = r1 * Math.sin(th) * r2 * Math.cos(phi)
       heights[k] = j / V
       lobes[k] = Math.sin(th * P.a.m * 0.5)

@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_NAME,
   MAX_NAME,
+  MOUTHS,
+  TOPPERS,
   buildSupershapeData,
   cleanName,
   describeParams,
@@ -66,17 +68,36 @@ describe('paramsFor', () => {
     const in2 = (x: number) => Math.abs(x * 100 - Math.round(x * 100)) < 1e-9
     for (const n of NAMES) {
       const p = paramsFor(n)
-      expect(Number.isInteger(p.a.m) && p.a.m >= 3 && p.a.m <= 10).toBe(true)
-      expect(Number.isInteger(p.b.m) && p.b.m >= 2 && p.b.m <= 6).toBe(true)
-      expect(p.a.n1).toBeGreaterThanOrEqual(0.5)
-      expect(p.a.n1).toBeLessThanOrEqual(1.6)
-      expect(p.b.n1).toBeGreaterThanOrEqual(0.6)
-      expect(p.b.n1).toBeLessThanOrEqual(1.8)
-      for (const v of [p.a.n2, p.a.n3, p.b.n2, p.b.n3]) {
-        expect(v).toBeGreaterThanOrEqual(0.4)
-        expect(v).toBeLessThanOrEqual(1.9)
+      expect(Number.isInteger(p.a.m) && p.a.m >= 2 && p.a.m <= 7).toBe(true)
+      expect(Number.isInteger(p.b.m) && p.b.m >= 2 && p.b.m <= 5).toBe(true)
+      expect(p.a.n1).toBeGreaterThanOrEqual(0.9)
+      expect(p.a.n1).toBeLessThanOrEqual(2.6)
+      expect(p.b.n1).toBeGreaterThanOrEqual(1.2)
+      expect(p.b.n1).toBeLessThanOrEqual(3.5)
+      for (const v of [p.a.n2, p.a.n3]) {
+        expect(v).toBeGreaterThanOrEqual(0.9)
+        expect(v).toBeLessThanOrEqual(2)
         expect(in2(v)).toBe(true)
       }
+      for (const v of [p.b.n2, p.b.n3]) {
+        expect(v).toBeGreaterThanOrEqual(1)
+        expect(v).toBeLessThanOrEqual(2)
+        expect(in2(v)).toBe(true)
+      }
+      expect(p.stretch).toBeGreaterThanOrEqual(0.85)
+      expect(p.stretch).toBeLessThanOrEqual(1.2)
+      expect(in2(p.stretch)).toBe(true)
+      const fc = p.face
+      expect(fc.eyeSize).toBeGreaterThanOrEqual(0.12)
+      expect(fc.eyeSize).toBeLessThanOrEqual(0.18)
+      expect(fc.eyeGap).toBeGreaterThanOrEqual(0.26)
+      expect(fc.eyeGap).toBeLessThanOrEqual(0.4)
+      expect(fc.eyeY).toBeGreaterThanOrEqual(0.02)
+      expect(fc.eyeY).toBeLessThanOrEqual(0.22)
+      expect(in2(fc.eyeSize) && in2(fc.eyeGap) && in2(fc.eyeY)).toBe(true)
+      expect(MOUTHS).toContain(fc.mouth)
+      expect(TOPPERS).toContain(fc.topper)
+      expect(typeof fc.blush).toBe('boolean')
       expect(in2(p.a.n1) && in2(p.b.n1)).toBe(true)
       expect(Number.isInteger(p.pal) && p.pal >= 0 && p.pal < 5).toBe(true)
       expect(Number.isInteger(p.theme) && p.theme >= 0 && p.theme < 4).toBe(true)
@@ -101,10 +122,48 @@ describe('paramsFor', () => {
       pal.add(p.pal)
       theme.add(p.theme)
     }
-    expect(am.size).toBe(8)
-    expect(bm.size).toBe(5)
+    expect(am.size).toBe(6)
+    expect(bm.size).toBe(4)
     expect(pal.size).toBe(5)
     expect(theme.size).toBe(4)
+  })
+})
+
+describe('paramsFor.stretch', () => {
+  it('determinista e insensible a mayúsculas', () => {
+    expect(paramsFor('Daniel').stretch).toBe(paramsFor('Daniel').stretch)
+    expect(paramsFor('Daniel').stretch).toBe(paramsFor('DANIEL').stretch)
+  })
+  it('varía entre nombres y cubre casi todo el rango', () => {
+    const vals = NAMES.map((n) => paramsFor(n).stretch)
+    expect(new Set(vals).size).toBeGreaterThan(20)
+    expect(Math.min(...vals)).toBeLessThan(0.9)
+    expect(Math.max(...vals)).toBeGreaterThan(1.15)
+  })
+})
+
+describe('paramsFor.face', () => {
+  it('misma cara para el mismo nombre, insensible a mayúsculas', () => {
+    expect(paramsFor('Daniel').face).toEqual(paramsFor('Daniel').face)
+    expect(paramsFor('Daniel').face).toEqual(paramsFor('DANIEL').face)
+  })
+  it('con muchos nombres aparecen todas las bocas, adornos y ambos valores de blush', () => {
+    const mouths = new Set<string>()
+    const toppers = new Set<string>()
+    const blush = new Set<boolean>()
+    for (const n of NAMES) {
+      const { face } = paramsFor(n)
+      mouths.add(face.mouth)
+      toppers.add(face.topper)
+      blush.add(face.blush)
+    }
+    expect([...mouths].sort()).toEqual([...MOUTHS].sort())
+    expect([...toppers].sort()).toEqual([...TOPPERS].sort())
+    expect([...blush].sort()).toEqual([false, true])
+  })
+  it('las caras varían entre nombres', () => {
+    const uniq = new Set(NAMES.map((n) => JSON.stringify(paramsFor(n).face)))
+    expect(uniq.size).toBeGreaterThan(NAMES.length * 0.9)
   })
 })
 
@@ -186,6 +245,26 @@ describe('buildSupershapeData', () => {
       expect(l).toBeLessThanOrEqual(1)
     }
   })
+  it('stretch cambia la relación alto/ancho del bbox en el sentido esperado', () => {
+    const ratio = (stretch: number) => {
+      const d = buildSupershapeData({ ...paramsFor('Daniel'), stretch }, 40, 20)
+      const min = [Infinity, Infinity, Infinity]
+      const max = [-Infinity, -Infinity, -Infinity]
+      for (let i = 0; i < d.positions.length; i++) {
+        const c = i % 3
+        min[c] = Math.min(min[c], d.positions[i])
+        max[c] = Math.max(max[c], d.positions[i])
+      }
+      const dims = [0, 1, 2].map((c) => max[c] - min[c])
+      expect(Math.max(...dims)).toBeCloseTo(2, 4)
+      return dims[1] / Math.max(dims[0], dims[2])
+    }
+    const low = ratio(0.85)
+    const high = ratio(1.2)
+    expect(high).toBeGreaterThan(low)
+    // La razón escala linealmente con stretch (x y z no cambian).
+    expect(high / low).toBeCloseTo(1.2 / 0.85, 2)
+  })
   it('es determinista', () => {
     const a = buildSupershapeData(paramsFor('Z'), 10, 5)
     const b = buildSupershapeData(paramsFor('Z'), 10, 5)
@@ -200,6 +279,8 @@ describe('describeParams', () => {
       b: { m: 3, n1: 0.6, n2: 1.9, n3: 0.4 },
       pal: 0,
       theme: 0,
+      face: { eyeSize: 0.15, eyeGap: 0.3, eyeY: 0.1, mouth: 'smile', blush: true, topper: 'none' },
+      stretch: 1,
     })
     expect(s).toBe('m 5×3 · n₁ 1.00/0.60 · n₂ 0.50/1.90 · n₃ 1.25/0.40')
   })
